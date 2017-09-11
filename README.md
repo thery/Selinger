@@ -1,2 +1,4 @@
 # Selinger
-Formalisation of Selinger proof about quantum gate
+Formalisation of Selinger paper :
+  Remarks on Matsumoto and Amano’s normal form
+ 
