@@ -276,7 +276,7 @@ Qed.
 Canonical conjS2I x := S2Iof (conjS2I_subproof x).
 
 Lemma s2int_eqE a b c d : 
-  a%:~R + b%:~R * sqrtC 2%:R == c%:~R + d%:~R * sqrtC 2%:R =
+  (a%:~R + b%:~R * sqrtC 2%:R == c%:~R + d%:~R * sqrtC 2%:R :> algC) =
   ((a == c) && (b == d)).
 Proof.
 apply/idP/idP=> [|/andP[/eqP->/eqP->]//].
@@ -327,7 +327,7 @@ Canonical conjS2I_additive := Additive conjS2I_sub.
 
 Lemma mulS2I_rect a b c d : 
    (a + b * sqrtC 2%:R) * (c + d * sqrtC 2%:R) =
-   (a * c + 2%:R * b * d) + (a * d + b * c) * sqrtC 2%:R.
+   (a * c + 2%:R * b * d) + (a * d + b * c) * sqrtC 2%:R :> algC.
 Proof.
 (* This should be ring *)
 rewrite !(mulrDl, mulrDr, mul1r) !mulrA -!addrA; congr (_ + _).
@@ -358,7 +358,8 @@ Qed.
 
 Fact s2intA_int (a : int) : s2intA (a%:~R) = a.
 Proof.
-have : a%:~R == a%:~R + 0%:~R * sqrtC 2%:R by rewrite mul0r addr0.
+have : a%:~R == a%:~R + 0%:~R * sqrtC 2%:R :> algC
+  by rewrite mul0r addr0.
 by rewrite {1}(eqP (Cint_S2I (Cint_int a))) s2int_eqE => /andP[/eqP].
 Qed.
 
@@ -367,7 +368,8 @@ Proof. by rewrite -mulrz_nat s2intA_int. Qed.
 
 Fact s2intB_int (a : int) : s2intB (a%:~R) = 0.
 Proof.
-have : a%:~R == a%:~R + 0%:~R * sqrtC 2%:R by rewrite mul0r addr0.
+have : a%:~R == a%:~R + 0%:~R * sqrtC 2%:R :> algC.
+  by rewrite mul0r addr0.
 by rewrite {1}(eqP (Cint_S2I (Cint_int a))) s2int_eqE => /andP[_ /eqP].
 Qed.
 
@@ -1550,7 +1552,7 @@ apply/idP/dvdS2IP=> [/oddzN_div[q Hq]|[q->]]; last first.
   rewrite rmorphM odds2iM  //=; last by have := algS2IP sQ2.
   have /eqP := algS2IP x.
   by rewrite (negPf odds2i_sQ2) andbF.
-pose r := (s2intB x)%:~R + q%:~R * sqrtC 2%:R.
+pose r : algC := (s2intB x)%:~R + q%:~R * sqrtC 2%:R.
 have rO : r \is a s2Int by rewrite divS2I_subproof.
 exists (S2Iof rO).
 apply/val_eqP=> /=.
@@ -1585,7 +1587,7 @@ Lemma odds2ij_dvd (x : S2I) : ~~ (odds2i x || odds2j x) = (2%:R %| x).
 Proof.
 rewrite negb_or.
 apply/idP/dvdS2IP=>[/andP[/oddzN_div[p Hp] /oddzN_div[q Hq]]|[q ->]].
-  pose r := p%:~R + q%:~R * sqrtC 2%:R.
+  pose r : algC := p%:~R + q%:~R * sqrtC 2%:R.
   have rO : r \is a s2Int by rewrite divS2I_subproof.
   exists (S2Iof rO); apply/val_eqP=>/=.
   have /eqP-> := algS2IP x.

@@ -11,13 +11,13 @@ Open Scope S2I_scope.
 
 Section Quantum.
 
-Lemma conjC_sqrt2 : (sqrtC 2%:R)^* = (sqrtC 2%:R).
+Lemma conjC_sqrt2 : (sqrtC 2%:R)^* = (sqrtC 2%:R) :> algC.
 Proof. by rewrite conj_Creal // Creal_s2Int // sQ2_proof. Qed.
 
-Lemma sqrt2_neq0 : sqrtC 2%:R != 0.
+Lemma sqrt2_neq0 : sqrtC 2%:R != 0 :> algC.
 Proof. by rewrite sqrtC_eq0 (eqC_nat 2 0). Qed.
 
-Lemma sqrt2X_neq0 k : sqrtC 2%:R ^+ k != 0.
+Lemma sqrt2X_neq0 k : sqrtC 2%:R ^+ k != 0 :> algC.
 Proof.  by rewrite expf_neq0 // sqrt2_neq0. Qed.
 
 Lemma conj_s2Int x : x \is a s2Int -> x^* = x.
@@ -36,7 +36,7 @@ by congr (F _ + F _ + F _); apply/val_eqP.
 Qed.
 
 (* conjugate transpose *)
-Definition trCmx m n (M : 'M_(m,n)) := map_mx conjC (trmx M).
+Definition trCmx m n (M : 'M_(m,n)) := map_mx (conjC : algC -> _) (trmx M).
 
 Notation "M ^T*" := (trCmx M) (at level 10).
 
@@ -713,7 +713,7 @@ Definition Tx :'M[algC]_3 :=
 Lemma mxounitary_Tx : Tx \is 1.-unitary.
 Proof.
 have F := algS2IP sQ2.
-have F1 : sqrtC 2%:R != 0 by rewrite sqrtC_eq0 (eqC_nat _ 0).
+have F1 : sqrtC 2%:R != 0 :> algC by rewrite sqrtC_eq0 (eqC_nat _ 0).
 have F2 : (sqrtC 2%:R)^-1 \is Creal by rewrite rpredV Creal_s2Int.
 apply/and3P; split.
 - by apply/mxunitaryP => i j;
@@ -739,7 +739,7 @@ Definition Ty :'M[algC]_3 :=
 Lemma mxounitary_Ty : Ty \is 1.-unitary.
 Proof.
 have F := algS2IP sQ2.
-have F1 : sqrtC 2%:R != 0 by rewrite sqrtC_eq0 (eqC_nat _ 0).
+have F1 : sqrtC 2%:R != 0 :> algC by rewrite sqrtC_eq0 (eqC_nat _ 0).
 have F2 : (sqrtC 2%:R)^-1 \is Creal by rewrite rpredV Creal_s2Int.
 apply/andP; split.
   by apply/mxunitaryP => i j;
@@ -766,7 +766,7 @@ Definition Tz :'M[algC]_3 :=
 Lemma mxounitary_Tz : Tz \is 1.-unitary.
 Proof.
 have F := algS2IP sQ2.
-have F1 : sqrtC 2%:R != 0 by rewrite sqrtC_eq0 (eqC_nat _ 0).
+have F1 : sqrtC 2%:R != 0 :> algC by rewrite sqrtC_eq0 (eqC_nat _ 0).
 have F2 : (sqrtC 2%:R)^-1 \is Creal by rewrite rpredV Creal_s2Int.
 apply/andP; split.
   by apply/mxunitaryP => i j;
@@ -794,7 +794,7 @@ Lemma TxT_mul (M : 'M[algC]_3) :
 Proof.
 apply/matrixP=> i j.
 have F := algS2IP sQ2.
-have F1 : sqrtC 2%:R != 0 by rewrite sqrtC_eq0 (eqC_nat _ 0).
+have F1 : sqrtC 2%:R != 0 :> algC by rewrite sqrtC_eq0 (eqC_nat _ 0).
 have F2 : (sqrtC 2%:R)^-1 \is Creal by rewrite rpredV Creal_s2Int.
 rewrite !mxE sum3E !mxE /=.
 by case/or3P: (o3E i) => /eqP->; case/or3P: (o3E j) => /eqP-> /=;
@@ -809,7 +809,7 @@ Lemma TxT_mul_row  (M : 'M[algC]_3) i j :
                    else if i == 1 then  (sqrtC 2%:R)^-1 * (M 1 j + M o2 j) else 
                    (sqrtC 2%:R)^-1 * (- M 1 j + M o2 j).
 Proof.
-have F1 : sqrtC 2%:R != 0 by rewrite sqrtC_eq0 (eqC_nat _ 0).
+have F1 : sqrtC 2%:R != 0 :> algC by rewrite sqrtC_eq0 (eqC_nat _ 0).
 rewrite TxT_mul !mxE.
 by case/or3P : (o3E i) => /eqP->; case/or3P : (o3E j) => /eqP->;
    rewrite //= mulrA mulVf ?mul1r.
@@ -824,7 +824,7 @@ Lemma TyT_mul (M : 'M[algC]_3) :
 Proof.
 apply/matrixP=> i j.
 have F := algS2IP sQ2.
-have F1 : sqrtC 2%:R != 0 by rewrite sqrtC_eq0 (eqC_nat _ 0).
+have F1 : sqrtC 2%:R != 0 :> algC by rewrite sqrtC_eq0 (eqC_nat _ 0).
 have F2 : (sqrtC 2%:R)^-1 \is Creal by rewrite rpredV Creal_s2Int.
 rewrite !mxE sum3E !mxE /=.
 by case/or3P: (o3E i) => /eqP->; case/or3P: (o3E j) => /eqP-> /=;
@@ -839,7 +839,7 @@ Lemma TyT_mul_row  (M : 'M[algC]_3) i j :
                    else if i == o2 then (sqrtC 2%:R)^-1 * (M 0 j + M o2 j) else 
                     (sqrtC 2%:R)^-1 * (M 0 j - M o2 j).
 Proof.
-have F1 : sqrtC 2%:R != 0 by rewrite sqrtC_eq0 (eqC_nat _ 0).
+have F1 : sqrtC 2%:R != 0 :> algC  by rewrite sqrtC_eq0 (eqC_nat _ 0).
 rewrite TyT_mul !mxE.
 by case/or3P : (o3E i) => /eqP->; case/or3P : (o3E j) => /eqP->;
    rewrite //= mulrA mulVf ?mul1r.
@@ -854,7 +854,7 @@ Lemma TzT_mul (M : 'M[algC]_3) :
 Proof.
 apply/matrixP=> i j.
 have F := algS2IP sQ2.
-have F1 : sqrtC 2%:R != 0 by rewrite sqrtC_eq0 (eqC_nat _ 0).
+have F1 : sqrtC 2%:R != 0 :> algC by rewrite sqrtC_eq0 (eqC_nat _ 0).
 have F2 : (sqrtC 2%:R)^-1 \is Creal by rewrite rpredV Creal_s2Int.
 rewrite !mxE sum3E !mxE /=.
 by case/or3P: (o3E i) => /eqP->; case/or3P: (o3E j) => /eqP-> /=;
@@ -869,7 +869,7 @@ Lemma TzT_mul_row  (M : 'M[algC]_3) i j :
                    else if i == 0 then (sqrtC 2%:R)^-1 * (M 0 j + M 1 j) else 
                    (sqrtC 2%:R)^-1 * (- M 0 j + M 1 j).
 Proof.
-have F1 : sqrtC 2%:R != 0 by rewrite sqrtC_eq0 (eqC_nat _ 0).
+have F1 : sqrtC 2%:R != 0 :> algC by rewrite sqrtC_eq0 (eqC_nat _ 0).
 rewrite TzT_mul !mxE.
 by case/or3P : (o3E i) => /eqP->; case/or3P : (o3E j) => /eqP->;
    rewrite //= mulrA mulVf ?mul1r.
@@ -880,10 +880,10 @@ Lemma mxsunitary_TxT m (M : 'M_3) :
 Proof.
 move=> Hos.
 have Hn := mxounitary_sunitary Hos.
-pose k := (sqrtC 2%:R) ^+ m.+1.
-pose l := (sqrtC 2%:R) ^+ m.+2.
+pose k : algC := (sqrtC 2%:R) ^+ m.+1.
+pose l : algC := (sqrtC 2%:R) ^+ m.+2.
 have F := algS2IP sQ2.
-have F1 : sqrtC 2%:R != 0 by rewrite sqrtC_eq0 (eqC_nat _ 0).
+have F1 : sqrtC 2%:R != 0 :> algC by rewrite sqrtC_eq0 (eqC_nat _ 0).
 have S1 := mxounitary_s2int _ _ Hos.
 case: eqP => [E1|/eqP D1].
   have F2 (k1 : 'I_3)  : 
@@ -942,13 +942,13 @@ Lemma mxounitaryS_TxT m (M : 'M_3) :
    M \is m.+2.-unitary -> Tx^T* * M \isn't m.-sunitary.
 Proof.
 move=> Hos; apply/negP=> Hn1.
-have F : sqrtC 2%:R != 0 by rewrite sqrtC_eq0 (eqC_nat _ 0).
+have F : sqrtC 2%:R != 0 :> algC by rewrite sqrtC_eq0 (eqC_nat _ 0).
 have := mxsunitary_TxT  Hos.
 case: eqP => [He /idP Hn| He /idP[]]; last first.
   by apply: mxsunitaryW Hn1.
-pose k := sqrtC 2%:R ^+ m.+2.
-pose l := sqrtC 2%:R ^+ m.+1.
-pose l1 := sqrtC 2%:R ^+ m.
+pose k : algC := sqrtC 2%:R ^+ m.+2.
+pose l : algC := sqrtC 2%:R ^+ m.+1.
+pose l1 : algC := sqrtC 2%:R ^+ m.
 pose x := l * ((Tx ^T* * M) 1 (ecol m.+2 M + 1)).
 have Px : x \is a s2Int by apply: mxsunitary_s2int Hn.
 have [Ox|Ex] := boolP (odds2i x).
@@ -980,10 +980,10 @@ Lemma mxsunitary_TyT m (M : 'M_3) :
 Proof.
 move=> Hos.
 have Hn := mxounitary_sunitary Hos.
-pose k := (sqrtC 2%:R) ^+ m.+1.
-pose l := (sqrtC 2%:R) ^+ m.+2.
+pose k : algC := (sqrtC 2%:R) ^+ m.+1.
+pose l : algC := (sqrtC 2%:R) ^+ m.+2.
 have F := algS2IP sQ2.
-have F1 : sqrtC 2%:R != 0 by rewrite sqrtC_eq0 (eqC_nat _ 0).
+have F1 : sqrtC 2%:R != 0 :> algC by rewrite sqrtC_eq0 (eqC_nat _ 0).
 have S1 := mxounitary_s2int _ _ Hos.
 case: eqP => [E1|/eqP D1].
   have F2 (k1 : 'I_3)  : 
@@ -1043,13 +1043,13 @@ Lemma mxounitaryS_TyT m (M : 'M_3) :
    M \is m.+2.-unitary ->  Ty^T* * M \isn't m.-sunitary.
 Proof.
 move=> Hos; apply/negP=> Hn1.
-have F : sqrtC 2%:R != 0 by rewrite sqrtC_eq0 (eqC_nat _ 0).
+have F : sqrtC 2%:R != 0 :> algC by rewrite sqrtC_eq0 (eqC_nat _ 0).
 have := mxsunitary_TyT  Hos.
 case: eqP => [He /idP Hn| He /idP[]]; last first.
   by apply: mxsunitaryW Hn1.
-pose k := sqrtC 2%:R ^+ m.+2.
-pose l := sqrtC 2%:R ^+ m.+1.
-pose l1 := sqrtC 2%:R ^+ m.
+pose k : algC := sqrtC 2%:R ^+ m.+2.
+pose l : algC := sqrtC 2%:R ^+ m.+1.
+pose l1 : algC := sqrtC 2%:R ^+ m.
 pose x := l * ((Ty ^T* * M) 0 (ecol m.+2 M + 1)).
 have Px : x \is a s2Int by apply: mxsunitary_s2int Hn.
 have [Ox|Ex] := boolP (odds2i x).
@@ -1082,10 +1082,10 @@ Lemma mxsunitary_TzT m (M : 'M_3) :
 Proof.
 move=> Hos.
 have Hn := mxounitary_sunitary Hos.
-pose k := (sqrtC 2%:R) ^+ m.+1.
-pose l := (sqrtC 2%:R) ^+ m.+2.
+pose k : algC := (sqrtC 2%:R) ^+ m.+1.
+pose l : algC := (sqrtC 2%:R) ^+ m.+2.
 have F := algS2IP sQ2.
-have F1 : sqrtC 2%:R != 0 by rewrite sqrtC_eq0 (eqC_nat _ 0).
+have F1 : sqrtC 2%:R != 0 :> algC by rewrite sqrtC_eq0 (eqC_nat _ 0).
 have S1 := mxounitary_s2int _ _ Hos.
 case: eqP => [E1|/eqP D1].
   have F2 (k1 : 'I_3)  : 
@@ -1144,13 +1144,13 @@ Lemma mxounitaryS_TzT m (M : 'M_3) :
    M  \is m.+2.-unitary -> Tz^T* * M \isn't m.-sunitary.
 Proof.
 move=> Hos; apply/negP=> Hn1.
-have F : sqrtC 2%:R != 0 by rewrite sqrtC_eq0 (eqC_nat _ 0).
+have F : sqrtC 2%:R != 0 :> algC by rewrite sqrtC_eq0 (eqC_nat _ 0).
 have := mxsunitary_TzT  Hos.
 case: eqP => [He /idP Hn| He /idP[]]; last first.
   by apply: mxsunitaryW Hn1.
-pose k := sqrtC 2%:R ^+ m.+2.
-pose l := sqrtC 2%:R ^+ m.+1.
-pose l1 := sqrtC 2%:R ^+ m.
+pose k : algC := sqrtC 2%:R ^+ m.+2.
+pose l : algC := sqrtC 2%:R ^+ m.+1.
+pose l1 : algC := sqrtC 2%:R ^+ m.
 pose x := l * ((Tz ^T* * M) 0 (ecol m.+2 M + 1)).
 have Px : x \is a s2Int by apply: mxsunitary_s2int Hn.
 have [Ox|Ex] := boolP (odds2i x).
@@ -1186,7 +1186,7 @@ Lemma Tx_mul (M : 'M[algC]_3) :
        [::   M 1 0 + M o2 0;     M 1 1 + M o2 1;     M 1 o2 + M o2 o2]]}.
 Proof.
 apply/matrixP=> i j.
-have F : sqrtC 2%:R != 0 by rewrite sqrtC_eq0 (eqC_nat _ 0).
+have F : sqrtC 2%:R != 0 :> algC by rewrite sqrtC_eq0 (eqC_nat _ 0).
 rewrite !mxE sum3E !mxE.
 by case/or3P : (o3E i) => /eqP->; case/or3P : (o3E j) => /eqP-> /=;
    rewrite /= ?(mul0r, mulr0, mulr1, add0r, addr0, mulNr, mulrN, mul1r)
@@ -1199,7 +1199,7 @@ Lemma Tx_mul_row  (M : 'M[algC]_3) i j :
                    (sqrtC 2%:R)^-1 * (M 1 j + M o2 j).
 Proof.
 rewrite Tx_mul !mxE.
-have F : sqrtC 2%:R != 0 by rewrite sqrtC_eq0 (eqC_nat _ 0).
+have F : sqrtC 2%:R != 0 :> algC by rewrite sqrtC_eq0 (eqC_nat _ 0).
 by case/or3P : (o3E i) => /eqP->; case/or3P : (o3E j) => /eqP->//=;
    rewrite mulrA mulVf // mul1r.
 Qed.
@@ -1270,7 +1270,7 @@ Qed.
 Lemma mxsunitary0_Tx_odd (M : 'M_3) : M \is 0.-sunitary -> Tx * M \is 1.-odd.
 Proof.
 move=> Hn; apply/mxoddP.
-have F : sqrtC 2%:R != 0 by rewrite sqrtC_eq0 (eqC_nat _ 0).
+have F : sqrtC 2%:R != 0 :> algC by rewrite sqrtC_eq0 (eqC_nat _ 0).
 have [i M1i] := mxsunitary0_ex_neq0 1 Hn.
 exists 1; exists i.
 rewrite Tx_mul_row /= mulrA mulfV // mul1r.
@@ -1282,7 +1282,7 @@ Lemma mxounitary_Tx_odd m (M : 'M_3) :
   M \is m.+1.-unitary -> (Tx * M \is m.+2.-odd) = (erow m.+1 M != 0).
 Proof.
 move=> Hos.
-have F : sqrtC 2%:R != 0 by rewrite sqrtC_eq0 (eqC_nat _ 0).
+have F : sqrtC 2%:R != 0 :> algC by rewrite sqrtC_eq0 (eqC_nat _ 0).
 have Hs2i := mxounitary_s2int _ _ Hos.
 have [eO1|dO1] /= := boolP (_ == _); apply/idP.
   apply/negP/mxoddPn => i j.
@@ -1309,9 +1309,9 @@ Lemma mxounitary_Tx_sunitary m (M : 'M_3) :
   M \is m.+1.-unitary -> (Tx * M \is m.-sunitary) = (erow m.+1 M == 0).
 Proof.
 move=> Hos.
-have F : sqrtC 2%:R != 0 by rewrite sqrtC_eq0 (eqC_nat _ 0).
-set k := (sqrtC 2%:R) ^+ m.+1.
-set l := (sqrtC 2%:R) ^+ m.+2.
+have F : sqrtC 2%:R != 0 :> algC by rewrite sqrtC_eq0 (eqC_nat _ 0).
+set k : algC := (sqrtC 2%:R) ^+ m.+1.
+set l : algC := (sqrtC 2%:R) ^+ m.+2.
 have S1 := mxounitary_s2int _ _ Hos.
 case: eqP => [E1|/eqP D1].
   have F1 (k1 : 'I_3)  : k1 != ecol m.+1 M -> even_col m.+2 (Tx * M) k1.
@@ -1374,7 +1374,7 @@ Lemma Ty_mul (M : 'M[algC]_3) :
        [::  - M 0 0 + M o2 0;   -M 0 1 + M o2 1;    -M 0 o2 + M o2 o2]]}.
 Proof.
 apply/matrixP=> i j.
-have F : sqrtC 2%:R != 0 by rewrite sqrtC_eq0 (eqC_nat _ 0).
+have F : sqrtC 2%:R != 0 :> algC by rewrite sqrtC_eq0 (eqC_nat _ 0).
 rewrite !mxE sum3E !mxE.
 by case/or3P : (o3E i) => /eqP->; case/or3P : (o3E j) => /eqP-> /=;
    rewrite /= ?(mul0r, mulr0, mulr1, add0r, addr0, mulNr, mulrN, mul1r)
@@ -1387,7 +1387,7 @@ Lemma Ty_mul_row  (M : 'M[algC]_3) i j :
                    (sqrtC 2%:R)^-1  * (M 0 j + M o2 j).
 Proof.
 rewrite Ty_mul !mxE.
-have F : sqrtC 2%:R != 0 by rewrite sqrtC_eq0 (eqC_nat _ 0).
+have F : sqrtC 2%:R != 0 :> algC by rewrite sqrtC_eq0 (eqC_nat _ 0).
 by case/or3P : (o3E i) => /eqP->; case/or3P : (o3E j) => /eqP->//=;
    rewrite mulrA mulVf // mul1r.
 Qed.
@@ -1395,7 +1395,7 @@ Qed.
 Lemma mxsunitary0_Ty_odd (M : 'M_3) : M \is 0.-sunitary -> Ty * M \is 1.-odd.
 Proof.
 move=> Hn; apply/mxoddP.
-have F : sqrtC 2%:R != 0 by rewrite sqrtC_eq0 (eqC_nat _ 0).
+have F : sqrtC 2%:R != 0 :> algC by rewrite sqrtC_eq0 (eqC_nat _ 0).
 have [i M1i] := mxsunitary0_ex_neq0 0 Hn.
 exists 0; exists i.
 rewrite Ty_mul_row /= mulrA mulfV // mul1r.
@@ -1407,7 +1407,7 @@ Lemma mxounitary_Ty_odd m (M : 'M_3) :
   M \is m.+1.-unitary -> (Ty * M \is m.+2.-odd) = (erow m.+1 M != 1).
 Proof.
 move=> Hos.
-have F : sqrtC 2%:R != 0 by rewrite sqrtC_eq0 (eqC_nat _ 0).
+have F : sqrtC 2%:R != 0 :> algC by rewrite sqrtC_eq0 (eqC_nat _ 0).
 have Hs2i := mxounitary_s2int _ _ Hos.
 have [eO1|dO1] /= := boolP (_ == _); apply/idP.
   apply/negP/mxoddPn => i j.
@@ -1434,9 +1434,9 @@ Lemma mxounitary_Ty_sunitary m (M : 'M_3) :
   M \is m.+1.-unitary -> (Ty * M \is m.-sunitary) = (erow m.+1 M == 1).
 Proof.
 move=> Hos.
-have F : sqrtC 2%:R != 0 by rewrite sqrtC_eq0 (eqC_nat _ 0).
-set k := (sqrtC 2%:R) ^+ m.+1.
-set l := (sqrtC 2%:R) ^+ m.+2.
+have F : sqrtC 2%:R != 0 :> algC by rewrite sqrtC_eq0 (eqC_nat _ 0).
+set k : algC := (sqrtC 2%:R) ^+ m.+1.
+set l : algC := (sqrtC 2%:R) ^+ m.+2.
 have S1 := mxounitary_s2int _ _ Hos.
 case: eqP => [E1|/eqP D1].
   have F1 (k1 : 'I_3)  : k1 != ecol m.+1 M -> even_col m.+2 (Ty * M) k1.
@@ -1499,7 +1499,7 @@ Lemma Tz_mul (M : 'M[algC]_3) :
        [::sqrtC 2%:R * M o2 0; sqrtC 2%:R * M o2 1 ;  sqrtC 2%:R * M o2 o2]]}.
 Proof.
 apply/matrixP=> i j.
-have F : sqrtC 2%:R != 0 by rewrite sqrtC_eq0 (eqC_nat _ 0).
+have F : sqrtC 2%:R != 0 :> algC by rewrite sqrtC_eq0 (eqC_nat _ 0).
 rewrite !mxE sum3E !mxE.
 by case/or3P : (o3E i) => /eqP->; case/or3P : (o3E j) => /eqP-> /=;
    rewrite /= ?(mul0r, mulr0, mulr1, add0r, addr0, mulNr, mulrN, mul1r)
@@ -1512,7 +1512,7 @@ Lemma Tz_mul_row  (M : 'M[algC]_3) i j :
                   (sqrtC 2%:R)^-1 * (M 0 j + M 1 j).
 Proof.
 rewrite Tz_mul !mxE.
-have F : sqrtC 2%:R != 0 by rewrite sqrtC_eq0 (eqC_nat _ 0).
+have F : sqrtC 2%:R != 0 :> algC by rewrite sqrtC_eq0 (eqC_nat _ 0).
 by case/or3P : (o3E i) => /eqP->; case/or3P : (o3E j) => /eqP->//=;
    rewrite mulrA mulVf // mul1r.
 Qed.
@@ -1520,7 +1520,7 @@ Qed.
 Lemma mxsunitary0_Tz_odd  (M : 'M_3) : M \is 0.-sunitary -> Tz * M \is 1.-odd.
 Proof.
 move=> Hn; apply/mxoddP.
-have F : sqrtC 2%:R != 0 by rewrite sqrtC_eq0 (eqC_nat _ 0).
+have F : sqrtC 2%:R != 0 :> algC by rewrite sqrtC_eq0 (eqC_nat _ 0).
 have [i M1i] := mxsunitary0_ex_neq0 0 Hn.
 exists 1; exists i.
 rewrite Tz_mul_row /= mulrA mulfV // mul1r.
@@ -1532,7 +1532,7 @@ Lemma mxounitary_Tz_odd m (M : 'M_3) :
   M \is m.+1.-unitary -> (Tz * M \is m.+2.-odd) = (erow m.+1 M != o2).
 Proof.
 move=> Hos.
-have F : sqrtC 2%:R != 0 by rewrite sqrtC_eq0 (eqC_nat _ 0).
+have F : sqrtC 2%:R != 0 :> algC by rewrite sqrtC_eq0 (eqC_nat _ 0).
 have Hs2i := mxounitary_s2int _ _ Hos.
 have [eO1|dO1] /= := boolP (_ == _); apply/idP.
   apply/negP/mxoddPn => i j.
@@ -1559,9 +1559,9 @@ Lemma mxounitary_Tz_sunitary m (M : 'M_3) :
   M \is m.+1.-unitary -> (Tz * M \is m.-sunitary) = (erow m.+1 M == o2).
 Proof.
 move=> Hos.
-have F : sqrtC 2%:R != 0 by rewrite sqrtC_eq0 (eqC_nat _ 0).
-set k := (sqrtC 2%:R) ^+ m.+1.
-set l := (sqrtC 2%:R) ^+ m.+2.
+have F : sqrtC 2%:R != 0 :> algC by rewrite sqrtC_eq0 (eqC_nat _ 0).
+set k : algC := (sqrtC 2%:R) ^+ m.+1.
+set l : algC := (sqrtC 2%:R) ^+ m.+2.
 have S1 := mxounitary_s2int _ _ Hos.
 case: eqP => [E1|/eqP D1].
   have F1 (k1 : 'I_3)  : k1 != ecol m.+1 M -> even_col m.+2 (Tz * M) k1.
@@ -1644,7 +1644,7 @@ Lemma even_row3_Tx_mul k (M : 'M[algC]_3) :
   M \is k.-sunitary -> even_row k.+1  (Tx * M) 0.
 Proof.
 move=> Hs.
-have F : sqrtC 2%:R != 0 by rewrite sqrtC_eq0 (eqC_nat _ 0).
+have F : sqrtC 2%:R != 0 :> algC by rewrite sqrtC_eq0 (eqC_nat _ 0).
 apply/forallP=> /= i; rewrite Tx_mul !mxE /=.
 by case/or3P: (o3E i) => /eqP->//=;
    rewrite !mulrA divfK // exprS -mulrA;
@@ -1656,7 +1656,7 @@ Lemma even_row3_Ty_mul k (M : 'M[algC]_3) :
  M \is k.-sunitary -> even_row k.+1  (Ty * M) 1.
 Proof.
 move=> Hs.
-have F : sqrtC 2%:R != 0 by rewrite sqrtC_eq0 (eqC_nat _ 0).
+have F : sqrtC 2%:R != 0 :> algC by rewrite sqrtC_eq0 (eqC_nat _ 0).
 apply/forallP=> /= i; rewrite Ty_mul !mxE /=.
 by case/or3P: (o3E i) => /eqP->//=;
    rewrite !mulrA divfK // exprS -mulrA;
@@ -1668,7 +1668,7 @@ Lemma even_row3_Tz_mul k (M : 'M[algC]_3) :
   M \is k.-sunitary -> even_row k.+1  (Tz * M) o2.
 Proof.
 move=> Hs.
-have F : sqrtC 2%:R != 0 by rewrite sqrtC_eq0 (eqC_nat _ 0).
+have F : sqrtC 2%:R != 0 :> algC by rewrite sqrtC_eq0 (eqC_nat _ 0).
 apply/forallP=> /= i; rewrite Tz_mul !mxE /=.
 by case/or3P: (o3E i) => /eqP->//=;
    rewrite !mulrA divfK // exprS -mulrA;
