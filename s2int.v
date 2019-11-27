@@ -202,7 +202,7 @@ Record S2I := S2Iof {
   algS2I :> algC;
   algS2IP : algS2I \is a s2Int }.
 
-Hint Resolve algS2IP.
+Hint Resolve algS2IP : core.
 
 Canonical S2I_subType := [subType for algS2I].
 
@@ -573,6 +573,7 @@ rewrite /conjs2i -mulNr  mulS2I_rect !mulrN rpredD //; last first.
 by rewrite rpredB // !rpredM ?Cint_int  // Cint_Cnat.
 Qed.
 
+Declare Scope S2I_scope.
 Delimit Scope S2I_scope with S2I.
 
 Open Scope S2I_scope.
@@ -1624,6 +1625,7 @@ Qed.
 
 End S2int.
 
+Declare Scope S2I_scope.
 Delimit Scope S2I_scope with S2I.
 
 Notation "'N x" := (normS2I x%R) (at level 10) : S2I_scope.
