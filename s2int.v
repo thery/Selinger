@@ -1447,13 +1447,13 @@ have NxP : (0 < 'N x)%N.
   by apply: leq_trans NyLNx; rewrite ltnNge leqn0 normS2I_eq0.
 rewrite (negPf nZy).
 have [r0|nZr0] := eqVneq (x %% y) 0.
-  by rewrite r0 egcdS2I_rec0r !mul0r subr0 add0r mul1r eqxx.
+  by rewrite r0 egcdS2I_rec0r !mul0r subr0 add0r mul1r.
 have NxyLn : ('N(x %% y)%S2I <= n)%N.
   by rewrite -ltnS (leq_trans _ NyLn) // ltn_modS2I.
 have NxyLNy : ('N (x %% y)%S2I <= 'N y)%N by rewrite ltnW // ltn_modS2I.
 have := IH _ _ nZr0 NxyLn NxyLNy.
 case: (egcdS2I_rec _ _) => u v ->.
-by rewrite (negPf nZr0) /= /modS2I mulrBr mulrBl addrCA mulrA.
+by rewrite /= /modS2I mulrBr mulrBl addrCA mulrA.
 Qed.
 
 Lemma egcdS2IP (x y : S2I) : gcdS2I x y = (egcdS2I x y).1 * x + (egcdS2I x y).2 * y.
