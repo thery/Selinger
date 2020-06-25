@@ -14,7 +14,7 @@ Set Implicit Arguments.
 Unset Strict Implicit.
 Unset Printing Implicit Defensive.
 
-Import GRing.Theory Num.Theory.
+Import Order.TTheory GRing.Theory Num.Theory.
 Open Scope ring_scope.
 
 Section S2int.
@@ -120,7 +120,7 @@ suff gAE : s2intA x = a.
   rewrite exprMn sqrtCK mulfK ?(eqr_nat _ _ 0) // pmulr_llt0; last first.
     by rewrite sqrtC_gt0 (ltr_nat _ 0).
   rewrite (ltr_int _ _ 0).
-  case: (lerP 0 b) => [H|/ltrW H].
+  case: (lerP 0 b) => [H|/ltW H].
     by rewrite mul1r sqrCK ?intCK // (ler_int _ 0).
   rewrite mulNr mul1r -[_%:~R]opprK exprNn -signr_odd mul1r sqrCK ?oppr_ge0 //.
     by rewrite floorCN  ?Cint_int // opprK ?intCK // (ler_int _ 0).
@@ -471,7 +471,7 @@ suff : 0 + 2%:R * 1 <= s2intA x ^+ 2 + 2%:R * s2intB x ^+ 2.
   by rewrite (eqP H) add0r mulr1 (ler_nat _ _ 1).
 rewrite ler_add ?sqr_ge0 // ler_pmul // -gtz0_ge1.
 rewrite real_exprn_even_gt0 //.
-by rewrite qualifE //; case: lerP => H1; rewrite //= ltrW.
+by rewrite qualifE //; case: lerP => H1; rewrite //= ltW.
 Qed.
 
 Lemma s2intA_sqrt_gt1 x : x \is a s2Int -> x != 0 -> 1 <= s2intA (x ^+ 2).
@@ -483,11 +483,11 @@ have [/eqP ZA|nZA] := boolP (s2intA x == 0).
   rewrite ZA expr0n add0r.
   have [/eqP ZB|nZB] := boolP (s2intB x == 0).
     by case/negP: nZx; rewrite (eqP xS) ZA ZB mul0r add0r.
-  apply: ler_trans (_ : 1 <= 1 * s2intB x ^+ 2) _.
+  apply: le_trans (_ : 1 <= 1 * s2intB x ^+ 2) _.
     rewrite mul1r -[_ ^+2]gez0_abs ?sqr_ge0 //.
     by rewrite abszX lez_nat expn_gt0 absz_gt0 nZB.
   by rewrite ler_pmul // sqr_ge0.
-apply: ler_trans (_ : 1 <= s2intA x ^+ 2 + 0) _.
+apply: le_trans (_ : 1 <= s2intA x ^+ 2 + 0) _.
   rewrite addr0 -[_ ^+2]gez0_abs ?sqr_ge0 //.
   by rewrite abszX lez_nat expn_gt0 absz_gt0 nZA.
 by rewrite ler_add // mulr_ge0 // sqr_ge0.
@@ -730,7 +730,7 @@ apply: (iffP idP) => [|[b [i->]]]; last first.
 wlog : x / (0 <= s2intB x) => [H HN|].
   have [PB|NB] := lerP 0 (s2intB x); first by apply: H.
   case (H (-x)) => [||b [i Hbi]].
-  - by rewrite raddfN s2intBN //= oppr_ge0 ltrW.
+  - by rewrite raddfN s2intBN //= oppr_ge0 ltW.
   - by rewrite normS2IN.
   by exists (~~ b); exists i; rewrite signrN mulNr -Hbi opprK.
 elim: {x}_.+1 {-2}x (ltnSn (`|s2intB (algS2I x)|)) => // [] [|n] IH x.
@@ -742,7 +742,7 @@ elim: {x}_.+1 {-2}x (ltnSn (`|s2intB (algS2I x)|)) => // [] [|n] IH x.
   have /eqP/= {1}-> := algS2IP x.
   rewrite B0 mul0r addr0 {1}[s2intA _]intEsign Nx mulr1 /=.
   by case: (_ < 0).
-rewrite normS2IEAB ler_eqVlt => Hs /orP[/eqP ZA |HP Nx].
+rewrite normS2IEAB le_eqVlt => Hs /orP[/eqP ZA |HP Nx].
   rewrite -ZA mulr0 subr0 abszX -{2}(exp1n 2) eqn_exp2r // => Nx.
   exists (s2intA (algS2I x) < 0); exists 0; apply/val_eqP.
   have /=/eqP{1}-> := algS2IP x.
@@ -758,20 +758,20 @@ have /andP[F2 F3] : b <= a < 2%:R * b.
   rewrite ler_norml (_ : - b ^ 2 = b ^ 2 - 2%:R * b ^ 2); last first.
     by rewrite mulrDl mul1r opprD addrA subrr add0r.
   rewrite ler_add2r -subr_ge0 subr_sqr pmulr_lge0; last first.
-    by rewrite (ltr_le_trans HP) // -[X in X <= _]add0r ler_add.
+    by rewrite (lt_le_trans HP) // -[X in X <= _]add0r ler_add.
   rewrite subr_ge0 => /andP[->/= HH].
   have : a ^ 2  < (2%:R * b) ^ 2.
     rewrite -[a ^ 2](subrK (2%:R * b ^ 2)).
     rewrite [X in _ < X]exprMn -natrX (_ : 2 ^ 2 = 2 + 2)%N // natrD mulrDl.
-    rewrite ltr_add2r (ler_lt_trans HH) // mulrDl mul1r -[X in X < _]add0r.
+    rewrite ltr_add2r (le_lt_trans HH) // mulrDl mul1r -[X in X < _]add0r.
     by rewrite ltr_add2r // exprn_even_gt0 // lt0r_neq0.
   rewrite -subr_gt0 subr_sqr pmulr_lgt0 1?subr_gt0 //.
-  rewrite (ltr_le_trans HP) // mulrDl mul1r -addrA -[X in X <= _]addr0.
-  by rewrite ler_add2l -[X in X <= _]addr0 ler_add // ltrW.
+  rewrite (lt_le_trans HP) // mulrDl mul1r -addrA -[X in X <= _]addr0.
+  by rewrite ler_add2l -[X in X <= _]addr0 ler_add // ltW.
 case: (ltrgtP (s2intA x) 0) => HH; last first.
   - by rewrite HH add0r abszN abszM muln_eq1 in Nx.
   - pose y := x *  (sQ2 - 1).
-    have aE : a = s2intA x by rewrite [a]ger0_norm // ltrW.
+    have aE : a = s2intA x by rewrite [a]ger0_norm // ltW.
     have yB : s2intB y = a - b.
       rewrite s2intB_mul //  s2intB_sub // (s2intB_nat 1) subr0.
     rewrite -[sQ2]mul1r s2intB_sqrt // (s2intA_nat 1) mulr1.
@@ -786,7 +786,7 @@ case: (ltrgtP (s2intA x) 0) => HH; last first.
   - rewrite ltnS in Hs; rewrite yB (leq_trans _ Hs) //.
     rewrite -ltz_nat -/b !gez0_abs ?subr_ge0 //.
     - by rewrite ltr_subl_addl -[b]mul1r -mulrDl.
-    - by rewrite ltrW.
+    - by rewrite ltW.
    by rewrite yB subr_ge0.
   - rewrite normS2IM normS2IEAB (eqP Nx).
     rewrite -opprB normS2IN -normS2I_conj rmorphB /= rmorph1 conjS2I_sQ2 opprK.
@@ -795,7 +795,7 @@ case: (ltrgtP (s2intA x) 0) => HH; last first.
   rewrite  exprzDr // expr1z mulrA -Hci -mulrA [1 + _]addrC.
   by rewrite -subr_sqr expr1n sQ2K -(natrB _ (isT: 1 <= 2)%N) mulr1.
 pose y := -x * (1 + sQ2).
-have aE : a = - s2intA x by rewrite [a]ler0_norm // ltrW.
+have aE : a = - s2intA x by rewrite [a]ler0_norm // ltW.
 have yB : s2intB y = a - b.
   rewrite s2intB_mul // s2intB_add // (s2intB_nat 1) add0r.
   rewrite -[sQ2]mul1r s2intB_sqrt // (s2intA_nat 1) mulr1.
@@ -810,7 +810,7 @@ case: (IH y) => [|||c [i Hci]].
 - rewrite ltnS in Hs; rewrite yB (leq_trans _ Hs) //.
   rewrite -ltz_nat -/b !gez0_abs ?subr_ge0 //.
   - by rewrite ltr_subl_addl -[b]mul1r -mulrDl.
-  - by rewrite ltrW.
+  - by rewrite ltW.
   by rewrite yB subr_ge0.
 - by rewrite normS2IM normS2IN normS2IEAB (eqP Nx) norm1DsQ2.
 exists (~~ c); exists (i - 1).
@@ -1500,13 +1500,13 @@ Proof. by rewrite /oddz abszN. Qed.
 
 Lemma oddzD z1 z2 : oddz (z1 + z2) = oddz z1 (+) oddz z2.
 Proof.
-case: z1; case: z2 => n1 n2; rewrite /oddz /= ?NegzE ?odd_add //; last first.
+case: z1; case: z2 => n1 n2; rewrite /oddz /= ?NegzE ?oddD //; last first.
 - by case: odd; rewrite /= negbK.
 - rewrite addrC.
-  have [H|H] := leqP n1 n2.+1; first by rewrite distnEr // odd_sub.
-  by rewrite distnEl ?(leq_trans _ H) // odd_sub 1?addbC // ?(leq_trans _ H) .
-have [H|H] := leqP n2 n1.+1; first by rewrite distnEr // odd_sub // addbC.
-by rewrite distnEl ?(leq_trans _ H) // odd_sub 1?addbC // ?(leq_trans _ H) .
+  have [H|H] := leqP n1 n2.+1; first by rewrite distnEr // oddB.
+  by rewrite distnEl ?(leq_trans _ H) // oddB 1?addbC // ?(leq_trans _ H) .
+have [H|H] := leqP n2 n1.+1; first by rewrite distnEr // oddB // addbC.
+by rewrite distnEl ?(leq_trans _ H) // oddB 1?addbC // ?(leq_trans _ H) .
 Qed.
 
 Lemma oddzM z1 z2 : oddz (z1 * z2) = oddz z1 && oddz z2.
@@ -1517,7 +1517,7 @@ Proof.
 wlog /gez0_abs<- : z / 0 <= z => [H Oz|Oz].
   have [/H/(_ Oz)[q ->]|H2] := lerP 0 z; first by exists q.
   rewrite -[z]opprK.
-  case: (H (-z))=> [||q->]; first by rewrite oppr_ge0 ltrW.
+  case: (H (-z))=> [||q->]; first by rewrite oppr_ge0 ltW.
     by rewrite oddzN.
   by exists (-q); rewrite mulrN.
 exists (Posz `|z|./2).

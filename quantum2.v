@@ -5,7 +5,7 @@ Unset Strict Implicit.
 From mathcomp Require Import all_ssreflect all_algebra all_field.
 Unset Printing Implicit Defensive.
 
-Import GRing.Theory Num.Theory zmodp.
+Import Order.TTheory GRing.Theory Num.Theory zmodp.
 
 Import perm fingroup.
 Open Scope ring_scope.
@@ -100,14 +100,14 @@ rewrite (s2intA_nat 1) /= s2intA_sum /= => [|k _ _]; last first.
 rewrite (bigD1 j) //= => H1.
 suff /s2intA_sqrt_eq1 : s2intA (M i j ^+ 2) = 1 => [/(_ (F _ _))|].
   by rewrite orbC.
-apply: ler_anti.
+apply: le_anti.
 rewrite -{1}[1]H1 ler_addl s2intA_sqrt_gt1 ?andbT //; last first.
   by apply: mcol_nz_nz; case/andP: Hs2.
 elim/big_rec: _ => // k y _ yP.
 apply: addr_ge0 => //.
 have [/eqP->|nZxs] := boolP (M i k == 0).
   by rewrite expr0n (s2intA_nat 0).
-by apply: ler_trans (s2intA_sqrt_gt1  _ _).
+by apply: le_trans (s2intA_sqrt_gt1  _ _).
 Qed.
 
 Lemma mcol_nz_eq0 n (M : 'M_n) i j :
@@ -131,7 +131,7 @@ move/eqP; rewrite (s2intA_nat 1) eq_sym addrC -subr_eq eq_sym subrr.
 rewrite psumr_eq0=> [/allP|j1 Hj1]; last first.
   have [/eqP->|/(s2intA_sqrt_gt1 (F _ _))] := boolP (M i j1 == 0).
     by by rewrite expr0n s2intA_nat.
-  by move/(ler_trans _)->.
+  by move/(le_trans _)->.
 move=> /(_ j (mem_index_enum _)); rewrite jDncol /= => /eqP H1.
 by have := s2intA_sqrt_gt1 (F _ _) nE; rewrite H1.
 Qed.
@@ -294,7 +294,7 @@ Definition NOSK {n k} := [pred M : OSK n k | \det M < 0].
 
 Lemma POSK_NOSK n k (M : OSK n k) : NOSK M = ~~ (POSK M).
 Proof.
-rewrite /= real_ltrNge ?ltr_neqAle  //.
+rewrite /= real_ltNge ?lt_neqAle  //.
   by rewrite eq_sym ?s2int_det_neq0.
 by case/orP : (s2int_det_eq M) => /eqP->; rewrite ?rpredN.
 Qed.
@@ -341,7 +341,7 @@ rewrite /= det_mulmx det_diag (bigD1 0) //= !mxE !ffunE expr1.
 rewrite big1 => [|i nZi]; last first.
   by rewrite !mxE ffunE eq_sym; case: i nZi => [] [].
 rewrite mulr1 mulrN1 oppr_gt0.
-rewrite /= real_ltrNge ?ltr_neqAle  //.
+rewrite /= real_ltNge ?lt_neqAle  //.
   by rewrite eq_sym ?s2int_det_neq0.
 by case/orP : (s2int_det_eq M) => /eqP->; rewrite ?rpredN.
 Qed.

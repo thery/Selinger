@@ -5,7 +5,7 @@ Set Implicit Arguments.
 Unset Strict Implicit.
 Unset Printing Implicit Defensive.
 
-Import GRing.Theory Num.Theory zmodp.
+Import Order.TTheory GRing.Theory Num.Theory zmodp.
 Open Scope ring_scope.
 Open Scope S2I_scope.
 
@@ -536,13 +536,13 @@ rewrite (s2intA_nat 1) /= s2intA_sum /= => [|k _ _]; last first.
   by rewrite expr2 rpredM.
 rewrite (bigD1 j) //= => H1.
 suff /s2intA_sqrt_eq1-> : s2intA (M i j ^+ 2) = 1 by [].
-apply: ler_anti.
+apply: le_anti.
 rewrite -{1}[1]H1 ler_addl s2intA_sqrt_gt1 ?andbT //.
 elim/big_rec: _ => // k y _ yP.
 apply: addr_ge0 => //.
 have [/eqP->|nZxs] := boolP (M i k == 0).
   by rewrite expr0n (s2intA_nat 0).
-by apply: ler_trans (s2intA_sqrt_gt1  _ _).
+by apply: le_trans (s2intA_sqrt_gt1  _ _).
 Qed.
 
 Definition even_row n m (M : 'M_n) i :=
