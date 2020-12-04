@@ -43,14 +43,14 @@ Qed.
 Lemma nat_irr2 m n : coprime m n -> (m ^ 2 != 2 * n ^ 2)%N.
 Proof.
 move=> Cp; apply/eqP=> m2E.
-have : ~~ odd (m ^ 2) by rewrite m2E odd_mul.
-rewrite odd_exp /= => Om.
+have : ~~ odd (m ^ 2) by rewrite m2E oddM.
+rewrite oddX /= => Om.
 have : ~~ odd (n ^ 2).
   have/eqP := m2E.
   rewrite -[m]odd_double_half (negPf Om) add0n.
   rewrite expnS expn1 -mul2n -mulnA eqn_mul2l => /eqP<-.
-  by rewrite mulnCA odd_mul.
-rewrite odd_exp /= => On.
+  by rewrite mulnCA oddM.
+rewrite oddX /= => On.
 suff /negP[] : ~~ (2 %| n)%N by rewrite dvdn2.
 by rewrite -prime_coprime // (coprime_dvdl _ Cp) // dvdn2.
 Qed.
@@ -1510,7 +1510,7 @@ by rewrite distnEl ?(leq_trans _ H) // oddB 1?addbC // ?(leq_trans _ H) .
 Qed.
 
 Lemma oddzM z1 z2 : oddz (z1 * z2) = oddz z1 && oddz z2.
-Proof. by rewrite /oddz abszM odd_mul. Qed.
+Proof. by rewrite /oddz abszM oddM. Qed.
 
 Lemma oddzN_div z : ~~ oddz z -> exists z1 : int, z = 2%:R * z1.
 Proof.
