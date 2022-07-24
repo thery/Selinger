@@ -1,0 +1,35 @@
+# This file was generated from `meta.yml`, please do not edit manually.
+# Follow the instructions on https://github.com/coq-community/templates to regenerate.
+
+opam-version: "2.0"
+maintainer: "thery@sophia.inria.fr"
+version: "dev"
+
+homepage: "https://github.com/thery/Selinger"
+dev-repo: "git+https://github.com/thery/Selinger.git"
+bug-reports: "https://github.com/thery/Selinger/issues"
+license: "MIT"
+
+synopsis: "Formalisation of Selinger's paper"
+description: """
+
+Formalisation of Selinger's paper :
+Remarks on Matsumoto and Amano’s normal form"""
+
+build: [make "-j%{jobs}%"]
+install: [make "install"]
+depends: [
+  "coq" {(>= "8.15")}
+  "coq-mathcomp-ssreflect" {(>= "1.15.0")}
+  "coq-mathcomp-algebra" {(>= "1.15.0")}
+  "coq-mathcomp-field" {(>= "1.15.0")}
+]
+
+tags: [
+  "keyword:sum of two squares"
+  "keyword:fermat theorem"
+  "logpath:Selinger"
+]
+authors: [
+  "Laurent Théry"
+]

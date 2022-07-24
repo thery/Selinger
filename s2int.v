@@ -21,7 +21,7 @@ Section S2int.
 
 Definition s2intA x : int :=
   let p := minCpoly x in
-    if size p == 3 then
+    if size p == 3%N then
     let a :=  - (p`_ 1 / 2%:R) in floorC a else floorC x.
 
 Definition s2intB x : int :=
@@ -95,7 +95,7 @@ rewrite qualifE; apply: (iffP eqP) => [->|[a [b Eab]]].
 pose ar := ratz a; pose br := ratz b.
 pose lp := [::- (2%:R * (br ^+ 2) - ar^+2);  - (2%:R * ar); 1].
 pose p := Poly lp.
-have sP : size p = 3. by rewrite [X in size X](@PolyK _ 0).
+have sP : size p = 3%N. by rewrite [X in size X](@PolyK _ 0).
 have rE : root (map_poly ratr p) x.
   rewrite map_polyE /root horner_Poly (@PolyK _ 0) //= mul0r add0r.
   rewrite rmorph1 mul1r raddfN /= rmorphM /=.

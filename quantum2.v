@@ -346,7 +346,7 @@ rewrite /= real_ltNge ?lt_neqAle  //.
 by case/orP : (s2int_det_eq M) => /eqP->; rewrite ?rpredN.
 Qed.
 
-Lemma card_OSK30 : #|OSK0_finType 2| = 48.
+Lemma card_OSK30 : #|OSK0_finType 2| = 48%N.
 Proof. by rewrite card_OSK0. Qed.
 
 Definition inOSK k (M : 'M[algC]_3) : OSK 3 k :=
@@ -866,9 +866,9 @@ Lemma MliftE M (ci co : 'cV_3) :
 Proof.
 move=> H.
 have FR (x : algC) : 'Re x *+ 2 = x + x^*.
-  by rewrite -mulr_natr divfK ?(eqC_nat _ 0).
+  by rewrite -mulr_natr /= /Re unlock divfK ?(eqC_nat _ 0).
 have FI (x : algC) : 'Im x *+ 2 = 'i * (x^* - x).
-  by rewrite -mulr_natr divfK ?(eqC_nat _ 0).
+  by rewrite -mulr_natr /Im unlock divfK ?(eqC_nat _ 0).
 have FNI : ((forall x : algC, 'i * x = x *'i)%R *
                  (forall x y: algC, x * 'i * y = x * y *'i)%R *
                  (forall x y z: algC, x * y * 'i * z = x * y * z *'i)%R)%type.
