@@ -183,8 +183,8 @@ Qed.
 Lemma mxs2intT n m (M : 'M_n) : (M ^T* \is m.-s2int) = (M \is m.-s2int).
 Proof.
 apply/mxs2intP/mxs2intP => H i j; have := H j i; rewrite !mxE => H1.
-  by rewrite  -[_ * _]conjCK s2Int_conj // rmorphM rmorphX conjC_sqrt2.
-by rewrite -conjC_sqrt2 -rmorphX -rmorphM s2Int_conj.
+  by rewrite  -[_ * _]conjCK s2Int_conj // rmorphM rmorphXn conjC_sqrt2.
+by rewrite -conjC_sqrt2 -rmorphXn -rmorphM s2Int_conj.
 Qed.
 
 Lemma mxs2int_tr n m (M : 'M_n) : M \is m.-s2int -> M^T* = M^T.
@@ -387,8 +387,8 @@ apply/andb_id2l=> /mxsunitary_s2int Hs.
 apply/mxoddP/mxoddP => [] [i [j H1]]; exists j; exists i;
      have := H1; rewrite !mxE => H2.
   rewrite  -[_ * _]conjCK odds2i_conj ?s2Int_conj //.
-  by rewrite rmorphM rmorphX conjC_sqrt2.
-by rewrite -conjC_sqrt2 -rmorphX -rmorphM odds2i_conj.
+  by rewrite rmorphM rmorphXn conjC_sqrt2.
+by rewrite -conjC_sqrt2 -rmorphXn -rmorphM odds2i_conj.
 Qed.
 
 Lemma mxounitary_tr n m (M : 'M_n) : M \is m.-unitary -> M^T* = M^T.
@@ -410,7 +410,7 @@ have F1 j1 : 2%:R ^+ m.+1 *  (M i j1 * (M i j1)^*) =  (k * M i j1) ^+ 2.
   rewrite [RHS]expr2 -{2}(_ : k * (M i j1) ^* = k * M i j1).
     rewrite -[RHS]mulrA  [_ * (k * _)]mulrCA !mulrA -expr2.
     by rewrite -exprM mulnC exprM sqrtCK.
-  rewrite {1}/k -conjC_sqrt2 -rmorphX -rmorphM.
+  rewrite {1}/k -conjC_sqrt2 -rmorphXn -rmorphM.
   by rewrite conj_Creal // Creal_s2Int // s2Int_conj.
 have : s2intB (2%:R ^+ m.+1 * 1%:R) == 0.
   by rewrite mulr1 -natrX /odds2j s2intB_nat.
@@ -448,12 +448,12 @@ have F1 j1 : 2%:R ^+ m.+1 *  (M i j1 * (M j j1)^*) =
   rewrite  -(_ : k * (M j j1) ^* = k * M j j1).
     rewrite -[RHS]mulrA  [_ * (k * _)]mulrCA !mulrA -expr2.
     by rewrite -exprM mulnC exprM sqrtCK.
-  rewrite {1}/k -conjC_sqrt2 -rmorphX -rmorphM.
+  rewrite {1}/k -conjC_sqrt2 -rmorphXn -rmorphM.
   by rewrite conj_Creal // Creal_s2Int // s2Int_conj.
 have : ~~ odds2i (2%:R ^+ m.+1 * (i == j)%:R).
   case: eqP => _.
     rewrite mulr1.
-    have ->: 2%:R ^+ m.+1 = (2%:R ^+ m.+1 : S2I) :> algC by rewrite rmorphX.
+    have ->: 2%:R ^+ m.+1 = (2%:R ^+ m.+1 : S2I) :> algC by rewrite rmorphXn.
     rewrite odds2i_dvd; apply/dvdS2IP; exists (sQ2 * 2%:R ^+ m); rewrite exprSr.
     by rewrite mulrAC -expr2 sQ2K mulrC.
   by rewrite mulr0 /odds2i (s2intA_nat 0).
@@ -537,7 +537,7 @@ rewrite (s2intA_nat 1) /= s2intA_sum /= => [|k _ _]; last first.
 rewrite (bigD1 j) //= => H1.
 suff /s2intA_sqrt_eq1-> : s2intA (M i j ^+ 2) = 1 by [].
 apply: le_anti.
-rewrite -{1}[1]H1 ler_addl s2intA_sqrt_gt1 ?andbT //.
+rewrite -{1}[1]H1 lerDl s2intA_sqrt_gt1 ?andbT //.
 elim/big_rec: _ => // k y _ yP.
 apply: addr_ge0 => //.
 have [/eqP->|nZxs] := boolP (M i k == 0).

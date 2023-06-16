@@ -101,7 +101,7 @@ rewrite (bigD1 j) //= => H1.
 suff /s2intA_sqrt_eq1 : s2intA (M i j ^+ 2) = 1 => [/(_ (F _ _))|].
   by rewrite orbC.
 apply: le_anti.
-rewrite -{1}[1]H1 ler_addl s2intA_sqrt_gt1 ?andbT //; last first.
+rewrite -{1}[1]H1 lerDl s2intA_sqrt_gt1 ?andbT //; last first.
   by apply: mcol_nz_nz; case/andP: Hs2.
 elim/big_rec: _ => // k y _ yP.
 apply: addr_ge0 => //.
@@ -970,7 +970,7 @@ apply/eqP/eqP=> /matrixP H1; apply/matrixP=> i j.
 rewrite /=.
 case/or3P : (i3E i) => {i}/eqP->; rewrite {j} (eqP (i1E j)).
 - suff : (Mlift M *m ci) 0 0 *+2  = co 0 0 *+2.
-    by move/eqP; rewrite eqr_muln2r => /eqP.
+    by move/eqP; rewrite eqrMn2r => /eqP.
   rewrite ![in RHS]mulr2n  -{1}[co 0 0](subrK (co 1 0 * 'i)).
   rewrite -addrA [_ * 'i + _]addrC.
   have := H1 0 1; rewrite !(mxE, s2E, s3E)/= ?Cl => <-.
@@ -991,7 +991,7 @@ case/or3P : (i3E i) => {i}/eqP->; rewrite {j} (eqP (i1E j)).
   set Z1 := _ * _ * z; set Z2 := _ * _ * z.
   by do 60 (rewrite-?addrA; try ((congr (_ + _); [idtac]) || rewrite addrC)).
 - suff : ((Mlift M *m ci) 1 0 *'i) *+2   = (co 1 0  * 'i) *+2.
-    by move/eqP; rewrite eqr_muln2r /= =>/eqP /(mulIf (neq0Ci _)).
+    by move/eqP; rewrite eqrMn2r /= =>/eqP /(mulIf (neq0Ci _)).
   rewrite ![in RHS]mulr2n  -{1}[co 1 0 * 'i](subrK (co 0 0)).
   rewrite -opprB -addrA.
   have FF := H1 0 1; rewrite !(mxE, s2E, s3E)/= ?Cl in FF; rewrite -{}FF.
