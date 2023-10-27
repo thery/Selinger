@@ -1,4 +1,5 @@
-From mathcomp Require Import all_ssreflect all_algebra all_field.
+From HB Require Import structures.
+From mathcomp Require Import all_ssreflect all_algebra all_field archimedean.
 Require Import gauss_int.
 
 (*****************************************************************************)
@@ -19,25 +20,34 @@ Open Scope ring_scope.
 
 Section S2int.
 
-Definition s2intA x : int :=
+Definition s2intA (x : algC) : int :=
   let p := minCpoly x in
     if size p == 3%N then
-    let a :=  - (p`_ 1 / 2%:R) in floorC a else floorC x.
+    let a :=  - (p`_ 1 / 2%:R) in Num.floor a else Num.floor x.
 
-Definition s2intB x : int :=
+Definition s2intB (x : algC) : int :=
   let a := s2intA x in
   let b := sqrtC ((x - a%:~R) ^+2  / 2%:R) in
-  (-1) ^+ (x - a%:~R < 0)%R * floorC b.
+  (-1) ^+ (x - a%:~R < 0)%R * Num.floor b.
 
-Definition s2Int := 
-  [qualify a x |  x == (s2intA x)%:~R + (s2intB x)%:~R * sqrtC 2%:R].
+Definition s2Int_subdef : pred algC :=
+  [pred x | x == (s2intA x)%:~R + (s2intB x)%:~R * sqrtC 2%:R].
 
-Lemma Creal_s2Int : {subset s2Int <= Creal}.
+Definition s2Int := [qualify a x : algC | s2Int_subdef x].
+
+Lemma s2IntE x : 
+  (x \is a s2Int) = (x == (s2intA x)%:~R + (s2intB x)%:~R * sqrtC 2%:R).
+Proof. by []. Qed.
+
+Lemma Creal_s2Int : {subset s2Int <= Num.real}.
 Proof.
 move=> x.
-rewrite qualifE => /eqP->.
-rewrite rpredD ?rpredM ?(Creal_Cint (Cint_int _)) //.
-by rewrite qualifE sqrtC_ge0 (ler_nat _ 0).
+rewrite s2IntE => /eqP->.
+rewrite rpredD // -[_ \in _]/(_ \is Num.real) ?rpredM //
+        -[_ \in _]/(_ \is Num.real).
+- by apply/Rreal_int/intr_int.
+- by apply/Rreal_int/intr_int.
+by rewrite qualifE /= sqrtC_ge0 (ler_nat _ 0).
 Qed.
 
 Lemma nat_irr2 m n : coprime m n -> (m ^ 2 != 2 * n ^ 2)%N.
@@ -79,18 +89,18 @@ Lemma rat_irr2 (r : rat) : r ^+ 2 != 2%:R.
 Proof.
 have /nat_irr2:= coprime_num_den r.
 apply: contra => H.
-rewrite -eqz_nat -(eqr_int [numDomainType of rat]) /=.
+rewrite -eqz_nat -(eqr_int (Num.NumDomain.clone _ rat)) /=.
 rewrite !PoszM -!expr2 /= [X in _ == X]rmorphM /= -[2%:~R](eqP H).
 rewrite -{2}[r]divq_num_den exprMn [X in _ == _ * X * _]exprVn.
 rewrite !rmorphXn /= !abszE !intr_norm !real_normK ?realz //.
 by rewrite mulfVK // expf_eq0 /= intq_eq0 denq_neq0.
 Qed.
 
-Lemma s2intP x: 
+Lemma s2intP (x : algC) : 
   reflect (exists a, exists b, x = a%:~R + b%:~R * sqrtC 2%:R)
            (x \is a s2Int).
 Proof.
-rewrite qualifE; apply: (iffP eqP) => [->|[a [b Eab]]].
+rewrite s2IntE; apply: (iffP eqP) => [->|[a [b Eab]]].
   by exists (s2intA x); exists (s2intB x).
 pose ar := ratz a; pose br := ratz b.
 pose lp := [::- (2%:R * (br ^+ 2) - ar^+2);  - (2%:R * ar); 1].
@@ -111,9 +121,8 @@ have rE : root (map_poly ratr p) x.
   set x3 := _ ^+ _.
   rewrite addrC !addrA.
   do 3 rewrite -[_ - ?[n] - ?n]addrA -opprD.
-  do 2 rewrite -[_ + ?[n] + ?n]addrA.
-  set y1 := ?[n] + ?n; set y2 := ?[n] + ?n; set y3 := ?[n] + ?n.
-  by rewrite -2!addrA -2!opprD [y1 + (_ + _)]addrA subrr.
+  rewrite [x1 + _ + x2]addrC addrK.
+  by rewrite -[_ + x3]addrA [_ + (x3 + _)]addrC !addrK subrr.
 suff gAE : s2intA x = a.
   suff -> : s2intB x = b by rewrite gAE.
   rewrite /s2intB gAE Eab -[a%:~R + _ ]addrC addrK.
@@ -121,13 +130,13 @@ suff gAE : s2intA x = a.
     by rewrite sqrtC_gt0 (ltr_nat _ 0).
   rewrite (ltr_int _ _ 0).
   case: (lerP 0 b) => [H|/ltW H].
-    by rewrite mul1r sqrCK ?intCK // (ler_int _ 0).
+  rewrite mul1r sqrCK ?intrKfloor // (ler_int _ 0) //=.
   rewrite mulNr mul1r -[_%:~R]opprK exprNn -signr_odd mul1r sqrCK ?oppr_ge0 //.
-    by rewrite floorCN  ?Cint_int // opprK ?intCK // (ler_int _ 0).
+    by rewrite floorN  ?intr_int // opprK ?intrKfloor // (ler_int _ 0).
   by rewrite (ler_int _ _ 0).
 rewrite /s2intA.
 case: (minCpolyP x) (size_minCpoly x) (root_minCpoly x) rE
-     => q [-> qM /(_ p) ->].
+     => /= q [-> qM /(_ p) ->].
 rewrite size_map_poly leq_eqVlt eq_sym => /orP[/eqP sZ H1 H2|H1 H2].
   rewrite sZ /=.
   move: H1.
@@ -135,10 +144,10 @@ rewrite size_map_poly leq_eqVlt eq_sym => /orP[/eqP sZ H1 H2|H1 H2].
   set u := _ `_ _;   set v := _ `_ _.
   rewrite raddfD /= !map_polyZ /= !map_polyX expr0 ?expr1.
   move: qM.
-  rewrite qualifE lead_coefE sZ -/v => /eqP->.
+  rewrite qualifE /= lead_coefE sZ -/v => /eqP->.
   rewrite !rmorph1 scale1r Eab /root !hornerE /=.
   have [/eqP-> _|nZb] := boolP (b == 0).
-    by rewrite mul0r addr0 intCK.
+    by rewrite mul0r addr0 intrKfloor.
   rewrite addr_eq0 => /eqP HH.
   have /eqP[] := rat_irr2  ((u + a%:~R) / b%:~R).
   rewrite -[LHS]ratCK rmorphXn rmorphM /= rmorphD /= ratr_int // HH.
@@ -153,18 +162,18 @@ rewrite eqn_leq H4 H1.
 have /eqP<- : p == q.
   rewrite eq_sym -eqp_monic // -1?dvdp_size_eqp //.
     by rewrite sP eqn_leq H4 H1.
-  by rewrite qualifE lead_coefE (@PolyK _ 0).
+  by rewrite qualifE /= lead_coefE (@PolyK _ 0).
 have -> : (map_poly ratr p)`_1 = ratr (- (2%:R * ar)) :> algC.
   by rewrite coef_map_id0 ?raddf0 // (@PolyK _ 0).
 rewrite raddfN /= mulNr opprK rmorphM /= ratr_nat.
 rewrite [2%:R * _]mulrC mulfK ?(eqC_nat _ 0) //.
-by rewrite [ar]ratzE ratr_int intCK.
+by rewrite [ar]ratzE ratr_int intrKfloor.
 Qed.
 
-Lemma Cint_S2I (x : algC) : x \in Cint -> x \is a s2Int.
+Lemma Cint_S2I (x : algC) : x \is a Num.int -> x \is a s2Int.
 Proof.
-move=> Cx; apply/s2intP; exists (floorC x); exists 0.
-by rewrite mul0r addr0 floorCK.
+move=> Cx; apply/s2intP; exists (Num.floor x); exists 0.
+by rewrite mul0r addr0 floorK.
 Qed.
 
 Lemma S2I_subring : subring_closed s2Int.
@@ -185,18 +194,12 @@ Qed.
 
 Lemma s2Int_conj x : (x^* \is a s2Int) = (x \is a s2Int).
 Proof.
-by (apply/idP/idP=> H; first rewrite -[x]conjCK); rewrite conj_Creal // Creal_s2Int.
+by (apply/idP/idP=> H; first rewrite -[x]conjCK); 
+   rewrite conj_Creal // Creal_s2Int.
 Qed.
 
-Fact S2I_key : pred_key s2Int. Proof. by []. Qed.
-Canonical S2I_keyed := KeyedQualifier S2I_key.
-Canonical S2I_opprPred := OpprPred S2I_subring.
-Canonical S2I_addrPred := AddrPred S2I_subring.
-Canonical S2I_mulrPred := MulrPred S2I_subring.
-Canonical S2I_zmodPred := ZmodPred S2I_subring.
-Canonical S2I_semiringPred := SemiringPred S2I_subring.
-Canonical S2I_smulrPred := SmulrPred S2I_subring.
-Canonical S2I_subringPred := SubringPred S2I_subring.
+HB.instance Definition _ := 
+  GRing.isSubringClosed.Build algC s2Int_subdef S2I_subring.
 
 Record S2I := S2Iof {
   algS2I :> algC;
@@ -204,20 +207,13 @@ Record S2I := S2Iof {
 
 Hint Resolve algS2IP : core.
 
-Canonical S2I_subType := [subType for algS2I].
-
-Definition eqS2IMixin := [eqMixin of S2I by <:].
-Canonical eqS2IType := EqType S2I eqS2IMixin.
-Definition S2I_choiceMixin := [choiceMixin of S2I by <:].
-Canonical S2I_choiceType := ChoiceType S2I S2I_choiceMixin.
-Definition S2I_countMixin := [countMixin of S2I by <:].
-Canonical S2I_countType := CountType S2I S2I_countMixin.
-Definition S2I_zmodMixin := [zmodMixin of S2I by <:].
-Canonical S2I_zmodType := ZmodType S2I S2I_zmodMixin.
-Definition S2I_ringMixin := [ringMixin of S2I by <:].
-Canonical S2I_ringType := RingType S2I S2I_ringMixin.
-Definition S2I_comRingMixin := [comRingMixin of S2I by <:].
-Canonical S2I_comRingType := ComRingType S2I S2I_comRingMixin.
+HB.instance Definition _ := [isSub for algS2I].
+HB.instance Definition _ := [Equality of S2I by <:].
+HB.instance Definition _ := [Choice of S2I by <:].
+HB.instance Definition _ := [Countable of S2I by <:].
+HB.instance Definition _ := [SubChoice_isSubZmodule of S2I by <:].
+HB.instance Definition _ := [SubZmodule_isSubRing of S2I by <:].
+HB.instance Definition _ := [SubRing_isSubComRing of S2I by <:].
 
 Fact sQ2_proof : sqrtC 2%:R \is a s2Int.
 Proof. by apply/s2intP; exists 0; exists 1; rewrite add0r mul1r. Qed.
@@ -248,10 +244,9 @@ rewrite negb_and negbK => /predU1P [->|/negPf xS2IF];
 by apply: val_inj; rewrite /invS2I ?val_insubd /= ?xS2IF // invr0 if_same.
 Qed.
 
-Definition S2I_comUnitRingMixin :=
-  ComUnitRingMixin mulS2Ir unitS2IP unitS2I_out.
-Canonical S2I_unitRingType := UnitRingType S2I S2I_comUnitRingMixin.
-Canonical S2I_comUnitRingType := [comUnitRingType of S2I].
+
+HB.instance Definition _ := 
+  GRing.ComRing_hasMulInverse.Build S2I mulS2Ir unitS2IP unitS2I_out.
 
 Fact algS2I_sub : {morph algS2I : a b / a - b}.
 Proof. by []. Qed.
@@ -259,8 +254,9 @@ Proof. by []. Qed.
 Fact algS2I_multiplicative : multiplicative algS2I.
 Proof. by []. Qed.
 
-Canonical algS2I_additive := Additive algS2I_sub.
-Canonical algS2I_rmorphism := AddRMorphism algS2I_multiplicative.
+HB.instance Definition _ := GRing.isAdditive.Build S2I algC algS2I algS2I_sub.
+HB.instance Definition _ :=
+  GRing.isMultiplicative.Build S2I algC algS2I algS2I_multiplicative.
 
 Lemma algS2I_mulrn x n : algS2I (x *+ n) = (algS2I x) *+ n.
 Proof. by elim: n => //= n IH; rewrite !mulrS raddfD /= IH. Qed.
@@ -323,7 +319,7 @@ rewrite /= /conjs2i s2intA_sub // s2intB_sub //.
 by rewrite -![-(_%:~R * _)]mulNr subS2I_rect -opprD !mulNr -!raddfB.
 Qed.
 
-Canonical conjS2I_additive := Additive conjS2I_sub.
+HB.instance Definition _ := GRing.isAdditive.Build S2I S2I conjS2I conjS2I_sub.
 
 Lemma mulS2I_rect a b c d : 
    (a + b * sqrtC 2%:R) * (c + d * sqrtC 2%:R) =
@@ -360,7 +356,7 @@ Fact s2intA_int (a : int) : s2intA (a%:~R) = a.
 Proof.
 have : a%:~R == a%:~R + 0%:~R * sqrtC 2%:R :> algC
   by rewrite mul0r addr0.
-by rewrite {1}(eqP (Cint_S2I (Cint_int a))) s2int_eqE => /andP[/eqP].
+by rewrite {1}(eqP (Cint_S2I (intr_int _ a))) s2int_eqE => /andP[/eqP].
 Qed.
 
 Fact s2intA_nat (a : nat) : s2intA (a%:R) = a%:R.
@@ -370,7 +366,7 @@ Fact s2intB_int (a : int) : s2intB (a%:~R) = 0.
 Proof.
 have : a%:~R == a%:~R + 0%:~R * sqrtC 2%:R :> algC.
   by rewrite mul0r addr0.
-by rewrite {1}(eqP (Cint_S2I (Cint_int a))) s2int_eqE => /andP[_ /eqP].
+by rewrite {1}(eqP (Cint_S2I (intr_int _ a))) s2int_eqE => /andP[_ /eqP].
 Qed.
 
 Fact s2intB_nat (a : nat) : s2intB (a%:R) = 0.
@@ -456,7 +452,8 @@ rewrite -mulNr -raddfN -raddfB /=.
 by rewrite /= s2int_eqE opprK !eqxx.
 Qed.
 
-Lemma s2intA_sqrt_eq1 x : x \is a s2Int -> s2intA (x ^+ 2) = 1 -> (x == -1) || (x == 1).
+Lemma s2intA_sqrt_eq1 x :
+  x \is a s2Int -> s2intA (x ^+ 2) = 1 -> (x == -1) || (x == 1).
 Proof.
 move=> xS /eqP.
 have /eqP{2 3}-> := xS.
@@ -464,14 +461,14 @@ have x2S : x ^+2 \is a s2Int by rewrite rpredX.
 rewrite expr2 s2intA_mul // -mulrA -!expr2.
 have [/eqP ZB|nZB] := boolP (s2intB x == 0).
   rewrite ZB expr0n !mulr0 !mul0r !addr0 sqrf_eq1.
-  rewrite -(@eqr_int [numDomainType of algC]) orbC.
-  by rewrite  -(@eqr_int [numDomainType of algC]) raddfN.
+  rewrite -(@eqr_int (Num.NumDomain.clone _ algC)) orbC.
+  by rewrite  -(@eqr_int (Num.NumDomain.clone _ algC)) raddfN.
 move=> H.
 suff : 0 + 2%:R * 1 <= s2intA x ^+ 2 + 2%:R * s2intB x ^+ 2.
   by rewrite (eqP H) add0r mulr1 (ler_nat _ _ 1).
 rewrite lerD ?sqr_ge0 // ler_pM // -gtz0_ge1.
 rewrite real_exprn_even_gt0 //.
-by rewrite qualifE //; case: lerP => H1; rewrite //= ltW.
+by rewrite qualifE //=; case: lerP => H1; rewrite //= ltW.
 Qed.
 
 Lemma s2intA_sqrt_gt1 x : x \is a s2Int -> x != 0 -> 1 <= s2intA (x ^+ 2).
@@ -493,7 +490,8 @@ apply: le_trans (_ : 1 <= s2intA x ^+ 2 + 0) _.
 by rewrite lerD // mulr_ge0 // sqr_ge0.
 Qed.
 
-Canonical conjS2I_rmorphism := AddRMorphism conjS2I_multiplicative.
+HB.instance Definition _ :=
+  GRing.isMultiplicative.Build S2I S2I conjS2I conjS2I_multiplicative.
 
 Lemma algS2I_nat n : algS2I n%:R = n%:R.
 Proof. by elim: n => //= n IH; rewrite -addn1 !natrD -IH. Qed.
@@ -518,7 +516,7 @@ Fact s2intA_sqrt (a : algC) :
 Proof.
 move=> Sa.
 have : a * sqrtC 2%:R \is a s2Int by rewrite rpredM // sqrt2_S2I.
-rewrite qualifE {1}(eqP Sa) addrC mulrDl -mulrA -expr2 sqrtCK mulrC.
+rewrite s2IntE {1}(eqP Sa) addrC mulrDl -mulrA -expr2 sqrtCK mulrC.
 by rewrite -mulrz_nat -rmorphM /= s2int_eqE => /andP[/eqP].
 Qed.
 
@@ -527,20 +525,20 @@ Fact s2intB_sqrt (a : algC) :
 Proof.
 move=> Sa.
 have : a * sqrtC 2%:R \is a s2Int by rewrite rpredM // sqrt2_S2I.
-rewrite qualifE {1}(eqP Sa) addrC mulrDl -mulrA -expr2 sqrtCK mulrC.
+rewrite s2IntE {1}(eqP Sa) addrC mulrDl -mulrA -expr2 sqrtCK mulrC.
 by rewrite -mulrz_nat -rmorphM /= s2int_eqE => /andP[_ /eqP].
 Qed.
 
 Lemma s2intA_rect z1 z2 : s2intA (z1%:~R + z2%:~R * sqrtC 2%:R) = z1.
 Proof.
-rewrite s2intA_add ?rpredM ?sqrt2_S2I ?Cint_S2I ?Cint_int //.
-by rewrite s2intA_int s2intA_sqrt ?Cint_S2I ?Cint_int // s2intB_int mulr0 addr0.
+rewrite s2intA_add ?rpredM ?sqrt2_S2I ?Cint_S2I ?intr_int //.
+by rewrite s2intA_int s2intA_sqrt ?Cint_S2I ?intr_int // s2intB_int mulr0 addr0.
 Qed.
 
 Lemma s2intB_rect z1 z2 : s2intB (z1%:~R + z2%:~R * sqrtC 2%:R) = z2.
 Proof.
-rewrite s2intB_add ?rpredM ?sqrt2_S2I ?Cint_S2I ?Cint_int //.
-by rewrite s2intB_int s2intB_sqrt ?Cint_S2I ?Cint_int // s2intA_int add0r.
+rewrite s2intB_add ?rpredM ?sqrt2_S2I ?Cint_S2I ?intr_int //.
+by rewrite s2intB_int s2intB_sqrt ?Cint_S2I ?intr_int // s2intA_int add0r.
 Qed.
 
 Lemma conjS2I_sQ2 : conjS2I sQ2 = - sQ2.
@@ -554,8 +552,8 @@ Lemma conjS2IK : involutive conjS2I.
 Proof.
 move=> x; apply/val_eqP => /=.
 rewrite /conjs2i !(s2intA_sub, s2intB_sub) 
-        ?rpredM ?(Cint_S2I (Cint_int _), sqrt2_S2I) //.
-rewrite !(s2intA_sqrt,s2intB_sqrt) ?(Cint_S2I (Cint_int _), sqrt2_S2I) //.
+        ?rpredM ?(Cint_S2I (intr_int _ _), sqrt2_S2I) //.
+rewrite !(s2intA_sqrt,s2intB_sqrt) ?(Cint_S2I (intr_int _ _), sqrt2_S2I) //.
 rewrite !s2intA_int !s2intB_int mulr0 subr0 sub0r raddfN mulNr opprK /=.
 by rewrite eq_sym // [_ == _]algS2IP.
 Qed.
@@ -564,13 +562,13 @@ Notation " a ^@ " := (conjs2i a) (at level 10).
 
 Definition s2intNorm (x : algC) := x * x^@.
 
-Lemma s2intNormCint (x : S2I) : s2intNorm (val x) \in Cint.
+Lemma s2intNormCint (x : S2I) : s2intNorm (val x) \in Num.int.
 Proof.
 rewrite /s2intNorm.
 have /eqP/= {1}-> := algS2IP x.
 rewrite /conjs2i -mulNr  mulS2I_rect !mulrN rpredD //; last first.
-  by rewrite [_%:~R * _]mulrC addrC subrr mul0r Cint0.
-by rewrite rpredB // !rpredM ?Cint_int  // Cint_Cnat.
+  by rewrite [_%:~R * _]mulrC addrC subrr mul0r int_num0.
+by rewrite rpredB // !rpredM ?intr_int  // intr_nat.
 Qed.
 
 Declare Scope S2I_scope.
@@ -578,17 +576,17 @@ Delimit Scope S2I_scope with S2I.
 
 Open Scope S2I_scope.
 
-Definition normS2I (x : S2I) : nat := `|floorC (s2intNorm (val x))|.
+Definition normS2I (x : S2I) : nat := `|Num.floor (s2intNorm (val x))|.
 Local Notation "'N x" := (normS2I x%R) (at level 10) : S2I_scope.
 
-Lemma normS2IE (x : S2I) : 'N x = `|floorC (val (x * conjS2I x)%R)|%N.
+Lemma normS2IE (x : S2I) : 'N x = `|Num.floor (val (x * conjS2I x)%R)|%N.
 Proof. by []. Qed.
 
 Lemma s2intNorm0 : s2intNorm 0 = 0.
 Proof. by rewrite /s2intNorm mul0r. Qed.
 
 Lemma normS2I0 : 'N 0 = 0%N.
-Proof. by rewrite /normS2I s2intNorm0 (intCK 0). Qed.
+Proof. by rewrite /normS2I s2intNorm0 (intrKfloor 0). Qed.
 
 Lemma s2intNorm1 : s2intNorm 1 = 1.
 Proof. 
@@ -597,7 +595,7 @@ by rewrite /s2intNorm mul1r => ->.
 Qed.
 
 Lemma normS2I1 : 'N 1 = 1%N.
-Proof. by rewrite /normS2I s2intNorm1 (intCK 1). Qed.
+Proof. by rewrite /normS2I s2intNorm1 (intrKfloor 1). Qed.
 
 Lemma normS2IN x : 'N (- x) = 'N x.
 Proof.  by rewrite normS2IE rmorphN /= mulNr mulrN opprK. Qed.
@@ -606,14 +604,15 @@ Lemma s2intNormM x y : x \is a s2Int -> y \is a s2Int ->
   s2intNorm (x * y) = s2intNorm x * s2intNorm y.
 Proof.
 move=> xS yS; rewrite /s2intNorm.
-have /val_eqP/eqP/=-> := rmorphM [rmorphism of conjS2I] (S2Iof xS) (S2Iof yS).
+have /val_eqP/eqP/=-> := 
+  rmorphM (GRing.RMorphism.clone _ _ _ conjS2I) (S2Iof xS) (S2Iof yS).
 by rewrite -!mulrA; congr (_ * _); rewrite mulrCA.
 Qed.
 
 Lemma normS2IM x y : 'N (x * y) = ('N x * 'N y)%N.
 Proof. 
-rewrite normS2IE rmorphM /= -!mulrA [algS2I y * (_ * _)]mulrCA.
-by rewrite !mulrA -mulrA floorCM ?abszM // s2intNormCint.
+rewrite normS2IE [conjS2I _]rmorphM /= -!mulrA [algS2I y * (_ * _)]mulrCA.
+by rewrite !mulrA -mulrA floorM ?abszM // s2intNormCint.
 Qed.
 
 Lemma normS2IX x n : 'N (x ^+ n) = ('N x ^ n)%N.
@@ -632,7 +631,7 @@ rewrite /normS2I /s2intNorm.
 have /eqP/= {1}-> := algS2IP x.
 rewrite /conjs2i -mulNr  mulS2I_rect !mulrN.
 rewrite [X in -X + _]mulrC addNr mul0r addr0 -mulrA.
-by rewrite -mulrz_nat -!rmorphM -rmorphB /= intCK.
+by rewrite -mulrz_nat -!rmorphM -rmorphB /= intrKfloor.
 Qed.
 
 Lemma normS2I_eq0 (x : S2I) : ('N x == 0%N) = (x == 0).
@@ -656,7 +655,7 @@ Qed.
 Lemma normS2I_nat n : 'N n%:R = (n ^ 2)%N.
 Proof.
 rewrite normS2IE /= /conjs2i algS2I_nat s2intA_nat s2intB_nat.
-by rewrite mul0r subr0 -mulrz_nat -intrM intCK -natrM natz.
+by rewrite mul0r subr0 -mulrz_nat -intrM intrKfloor -natrM natz.
 Qed.
 
 Lemma normS2I_int z : 'N z%:~R = (`|z| ^ 2)%N.
@@ -676,20 +675,19 @@ Proof.
 apply/eqP/idP=> [|/GRing.unitrPr[y xyE]]; last first.
   have /eqP := normS2I_nat 1.
   by rewrite exp1n -xyE mulr1n normS2IM muln_eq1 => /andP[/eqP].
-rewrite /normS2I /s2intNorm; set u := floorC _ => H.
+rewrite /normS2I /s2intNorm; set u := Num.floor _ => H.
 apply/GRing.unitrPr.
 case: (lerP 0 u) => Hu.
   have := gez0_abs Hu; rewrite H /= => Hv.
   exists (conjS2I x); apply/val_eqP => /=.
-  have := floorCK (s2intNormCint x).
+  have := floorK (s2intNormCint x).
   by rewrite /s2intNorm -/u -Hv => <-.
 have := ltz0_abs Hu; rewrite H /= => Hv.
 exists (-(conjS2I x)); apply/val_eqP => /=.
-have := floorCK (s2intNormCint x).
+have := floorK (s2intNormCint x).
 rewrite mulrN /s2intNorm -/u => <-.
 by rewrite -raddfN /= -Hv.
 Qed.
-
 
 Fact S2I_idomainAxiom (x y : S2I) : x * y = 0 -> (x == 0) || (y == 0).
 Proof.
@@ -697,17 +695,19 @@ move=> /(congr1 normS2I) /= /eqP.
 by rewrite normS2IM normS2I0 muln_eq0 !normS2I_eq0.
 Qed.
 
-Canonical S2I_idomainType :=
-  Eval hnf in IdomainType S2I S2I_idomainAxiom.
+HB.instance Definition _ := GRing.ComUnitRing_isIntegral.Build S2I
+                                    S2I_idomainAxiom.
 
 Lemma sQ2K : sQ2 ^+ 2 = 2%:R.
 Proof. by apply/val_eqP; rewrite [val _]sqrtCK. Qed.
 
 Fact norm1DsQ2 : 'N (1 + sQ2) = 1%N.
 Proof.
-rewrite normS2IE rmorphD rmorph1 [_ conjS2I_rmorphism sQ2]conjS2I_sQ2.
+rewrite normS2IE.
+have -> : conjS2I (1 + sQ2) = 1 - sQ2.
+  by rewrite rmorphD rmorph1 [X in (1 + X)]conjS2I_sQ2.
 rewrite mulrC -subr_sqr expr1n sQ2K -opprB -(natrB _ (isT: 1 <= 2)%N) mulr1n.
-by rewrite (intCK (-1)) abszN1.
+by rewrite (intrKfloor (-1)) abszN1.
 Qed.
 
 Lemma normS2I_eq1P (x : S2I) : 
@@ -726,7 +726,7 @@ apply: (iffP idP) => [|[b [i->]]]; last first.
   rewrite rmorphD /= rmorph1 conjS2I_sQ2.
   rewrite mulrC -subr_sqr expr1n sQ2K -opprB -(natrB _ (isT: 1 <= 2)%N) mulr1n.
   rewrite rmorphXz ?rpredN ?rpred1 //= expN1r.
-  by rewrite floorCX ?rpredN // floorCN // floorC1 // absz_sign.
+  by rewrite floorX ?rpredN //= // floorN // floor1 // absz_sign.
 wlog : x / (0 <= s2intB x) => [H HN|].
   have [PB|NB] := lerP 0 (s2intB x); first by apply: H.
   case (H (-x)) => [||b [i Hbi]].
@@ -762,7 +762,8 @@ have /andP[F2 F3] : b <= a < 2%:R * b.
   rewrite subr_ge0 => /andP[->/= HH].
   have : a ^ 2  < (2%:R * b) ^ 2.
     rewrite -[a ^ 2](subrK (2%:R * b ^ 2)).
-    rewrite [X in _ < X]exprMn -natrX (_ : 2 ^ 2 = 2 + 2)%N // natrD mulrDl.
+    rewrite [X in _ < X]exprMn -natrX (_ : 2 ^ 2 = 2 + 2)%N //.
+    rewrite  natrD [X in _ < X]mulrDl.
     rewrite ltrD2r (le_lt_trans HH) // mulrDl mul1r -[X in X < _]add0r.
     by rewrite ltrD2r // exprn_even_gt0 // lt0r_neq0.
   rewrite -subr_gt0 subr_sqr pmulr_lgt0 1?subr_gt0 //.
@@ -825,7 +826,7 @@ Proof. by apply/s2intP; exists x; exists y. Qed.
 Definition divS2I (x y : S2I) : S2I :=
   let za := s2intA x * s2intA y  - 2%:R * s2intB x * s2intB y in
   let zb := s2intB x * s2intA y - s2intA x * s2intB y in
-  let n := floorC (s2intNorm y) in
+  let n := Num.floor (s2intNorm y) in
   S2Iof (divS2I_subproof (cdivz za n) (cdivz zb n)).
 
 Notation " x %/ y " := (divS2I x y) : S2I_scope.
@@ -846,7 +847,7 @@ Lemma divS2I1 x : x %/ 1 = x.
 Proof.
 apply/val_eqP=> /=.
 rewrite !(s2intA_nat 1, s2intB_nat 1, mulr1, mulr0, subr0).
-by rewrite s2intNorm1 floorC1 !cdivz1 eq_sym; exact: (algS2IP x).
+by rewrite s2intNorm1 floor1 !cdivz1 eq_sym; exact: (algS2IP x).
 Qed.
 
 Lemma s2intNormE (x : S2I) :
@@ -854,14 +855,16 @@ Lemma s2intNormE (x : S2I) :
 Proof.
 rewrite /s2intNorm mulrC.
 have /eqP{2}-> := algS2IP x.
-by rewrite -subr_sqr exprMn sqrtCK mulrC rmorphB rmorphM !rmorphXn.
+rewrite -subr_sqr exprMn sqrtCK mulrC rmorphB /=. 
+rewrite [in RHS]rmorphXn; congr (_ - _).
+by rewrite [in RHS]rmorphM /= rmorphXn.
 Qed.
 
 Lemma divS2Ixx (x : S2I) : x != 0 -> x %/ x = 1.
 Proof.
 move=> xNz; apply/val_eqP => /=.
 rewrite [s2intB _ * s2intA _]mulrC subrr cdiv0z mul0r addr0.
-rewrite s2intNormE !intCK.
+rewrite s2intNormE !intrKfloor.
 set a := _ - _; set b := _ - _.
 have abE : a = b  by rewrite /a /b !(expr1, exprS) !mulrA.
 rewrite abE cdivzz // -abE.
@@ -895,7 +898,7 @@ have [/eqP->|yNz] := boolP (y == 0).
   by rewrite normS2I0 modS2I0.
 have /ltn_pmul2r<-: (0 < 'N(y) ^ 2)%N by rewrite sqrn_gt0 lt0n normS2I_eq0.
 rewrite -{1}normS2I_int -!normS2IM /modS2I /divS2I.
-rewrite s2intNormE intCK.
+rewrite s2intNormE intrKfloor.
 set xa := s2intA _; set ya := s2intA _.
 set xb := s2intB _; set yb := s2intB _.
 set za : int := _ - _; set Ny : int := _ - _; set zb : int := _ * _ - _.
@@ -923,9 +926,9 @@ set xx := _ + _.
 have sxx : xx \is a s2Int by apply/s2intP; eexists; eexists.
 rewrite s2intNormM ?s2int //.
 have /= -> := s2intNormE (S2Iof sxx).
-rewrite floorCM ?Cint_int ?s2intNormCint // abszM.
+rewrite floorM ?intr_int ?s2intNormCint // abszM.
 rewrite mulnC ltn_pmul2l; last by rewrite lt0n normS2I_eq0.
-rewrite s2intA_rect s2intB_rect intCK.
+rewrite s2intA_rect s2intB_rect intrKfloor.
 set x1 : int := _ ^+ 2; set x2 : int := _ ^+ 2.
 apply: leq_ltn_trans (_ : (`|x1| + 2 * `|x2| < _)%N).
   have := leqD_dist (x1) (x1 + 2%:R * x2) (2%:R * x2).
@@ -938,10 +941,10 @@ have NyE : `|Ny|%N = 'N y by rewrite normS2IEAB.
 have NyP : Ny != 0 by rewrite -absz_eq0 NyE normS2I_eq0.
 rewrite -NyE mulnDl mul1n leq_add //.
   by rewrite !abszX -!expnMn leq_exp2r //
-       -(@ler_nat [numDomainType of int]) natrM !natz cmodz_lt.
+       -(@ler_nat (Num.NumDomain.clone _ int)) natrM !natz cmodz_lt.
 rewrite mulnCA leq_mul2l /=.
 by rewrite !abszX -!expnMn leq_exp2r //
-     -(@ler_nat [numDomainType of int]) natrM !natz cmodz_lt.
+     -(@ler_nat (Num.NumDomain.clone _ int)) natrM !natz cmodz_lt.
 Qed.
 
 Lemma ltn_modS2IN0 x y : y != 0 -> ('N (x %% y)%S2I < 'N y)%N.

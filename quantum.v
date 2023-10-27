@@ -36,7 +36,7 @@ by congr (F _ + F _ + F _); apply/val_eqP.
 Qed.
 
 (* conjugate transpose *)
-Definition trCmx m n (M : 'M_(m,n)) := map_mx (conjC : algC -> _) (trmx M).
+Definition trCmx m n (M : 'M_(m,n)) := map_mx (fun x : algC => x ^*) (trmx M).
 
 Notation "M ^T*" := (trCmx M) (at level 10).
 
