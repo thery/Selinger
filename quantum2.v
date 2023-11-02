@@ -26,8 +26,6 @@ Lemma OSKo (M : OSK) : OSKm M \is k.-odd.
 Proof. by case/and3P : (OSKos M). Qed.
 
 HB.instance Definition _ := [isSub for OSKm].
-HB.instance Definition _ := [Equality of OSK by <:].
-HB.instance Definition _ := [Choice of OSK by <:].
 HB.instance Definition _ := [Countable of OSK by <:].
 
 End OSK.
@@ -534,10 +532,7 @@ Definition OSKn_uniq_enumP k : Finite.axiom _ :=
   Finite.uniq_enumP (OSKn_enum_uniq k) (@mem_OSKn_enum k).
 
 Definition OSK3 k := (OSK 3 k).
-HB.instance Definition _ k := [Equality of OSK3 k by <:].
-HB.instance Definition _ k := [Choice of OSK3 k by <:].
 HB.instance Definition _ k := [Countable of OSK3 k by <:].
-
 HB.instance Definition _ k := isFinite.Build (OSK3 k) (@OSKn_uniq_enumP k).
 
 Lemma OSK_card k : #|OSK3 k| = (48 * (3 ^ (k != 0)) * 2 ^ (k.-1))%N.

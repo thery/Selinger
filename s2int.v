@@ -208,12 +208,8 @@ Record S2I := S2Iof {
 Hint Resolve algS2IP : core.
 
 HB.instance Definition _ := [isSub for algS2I].
-HB.instance Definition _ := [Equality of S2I by <:].
-HB.instance Definition _ := [Choice of S2I by <:].
 HB.instance Definition _ := [Countable of S2I by <:].
-HB.instance Definition _ := [SubChoice_isSubZmodule of S2I by <:].
-HB.instance Definition _ := [SubZmodule_isSubRing of S2I by <:].
-HB.instance Definition _ := [SubRing_isSubComRing of S2I by <:].
+HB.instance Definition _ := [SubChoice_isSubComRing of S2I by <:].
 
 Fact sQ2_proof : sqrtC 2%:R \is a s2Int.
 Proof. by apply/s2intP; exists 0; exists 1; rewrite add0r mul1r. Qed.
