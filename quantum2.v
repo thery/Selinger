@@ -258,8 +258,8 @@ Qed.
 Lemma s2int_det n k (M : OSK n k) : (sqrtC 2%:R) ^+ (k * n) * \det M \in s2Int.
 Proof.
 have H i j := mxsunitary_s2int i j (OSKs M).
-rewrite mulr_sumr rpred_sum => // i _.
-rewrite mulrCA exprM -{2}[n]card_ord -prodr_const /=.
+rewrite mulr_sumr rpred_sum => //= i _.
+rewrite mulrCA exprM /= -[X in _ ^+ _ ^+ X]card_ord -prodr_const /=.
 rewrite -big_split /=.
 by rewrite rpredM ?rpred_prod // rpredX // rpredN rpred1.
 Qed.
