@@ -1151,7 +1151,7 @@ rewrite ltnS leqn0 normS2I_eq0 => /eqP->.
 by rewrite modS2I0 gcdS2I0.
 Qed.
 
-Lemma gcdS2Ixx : idempotent gcdS2I.
+Lemma gcdS2Ixx : idempotent_op gcdS2I.
 Proof. by move=> x; rewrite gcdS2IE ltnn modS2Ixx gcd0S2I. Qed.
 
 Lemma dvdS2I_mod d x y : d %| x -> (d %| y) = (d %| y %% x).
