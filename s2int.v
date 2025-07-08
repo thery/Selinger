@@ -209,7 +209,7 @@ Hint Resolve algS2IP : core.
 
 HB.instance Definition _ := [isSub for algS2I].
 HB.instance Definition _ := [Countable of S2I by <:].
-HB.instance Definition _ := [SubChoice_isSubComRing of S2I by <:].
+HB.instance Definition _ := [SubChoice_isSubComNzRing of S2I by <:].
 
 Fact sQ2_proof : sqrtC 2%:R \is a s2Int.
 Proof. by apply/s2intP; exists 0; exists 1; rewrite add0r mul1r. Qed.
@@ -242,7 +242,7 @@ Qed.
 
 
 HB.instance Definition _ := 
-  GRing.ComRing_hasMulInverse.Build S2I mulS2Ir unitS2IP unitS2I_out.
+  GRing.ComNzRing_hasMulInverse.Build S2I mulS2Ir unitS2IP unitS2I_out.
 
 Fact algS2I_sub : {morph algS2I : a b / a - b}.
 Proof. by []. Qed.
@@ -284,7 +284,7 @@ rewrite rmorphM /= mulrAC rmorphXn /= -exprMn mulfV ?mul1r //.
 by rewrite (eqr_int _ _ 0) subr_eq0 eq_sym.
 Qed.
 
-Lemma subS2I_rect (R : ringType) (a b c d z : R) : 
+Lemma subS2I_rect (R : pzRingType) (a b c d z : R) : 
    (a + b * z) - (c + d * z) = (a - c) + (b - d) * z.
 Proof.
 by rewrite opprD addrA [a + _ - _]addrAC -!addrA -mulrBl !addrA.
@@ -632,7 +632,7 @@ Qed.
 
 Lemma normS2I_eq0 (x : S2I) : ('N x == 0%N) = (x == 0).
 Proof.
-have /charf0P<- := Cchar.
+have /pcharf0P<- := Cpchar.
 rewrite normS2IEAB (eqr_nat _ _ 0) absz_eq0 subr_eq0 int_irr2E.
 apply/idP/eqP => [/andP[/eqP H1 /eqP H2]|->]; last first.
   by rewrite (s2intA_nat 0) (s2intB_nat 0).

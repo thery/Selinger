@@ -28,7 +28,7 @@ Definition o2 : 'I_3 := Ordinal (isT: 2 < 3)%N.
 Definition o3E (i : 'I_3) : [||i == 0, i ==1 | i == o2].
 Proof. by case: i => [] [|[|[|]]]. Qed.
 
-Lemma sum3E (R :ringType) (F : 'I_3 -> R) : 
+Lemma sum3E (R : pzRingType) (F : 'I_3 -> R) : 
   \sum_(i < 3)  F i = F 0 + F 1 + F o2.
 Proof.
 rewrite !big_ord_recl /= big_ord0 addr0 !addrA.
@@ -62,7 +62,7 @@ Lemma trCmx_mul m n p (A : 'M_(m, n)) (B : 'M_(n, p)) :
    (A *m B)^T* = B^T* *m A^T*.
 Proof. by rewrite /trCmx -!map_trmx map_mxM trmx_mul. Qed.
 
-Lemma trmx_eq0 m n (R: ringType) (M : 'M[R]_(m, n)) : (M  ^T == 0) = (M == 0).
+Lemma trmx_eq0 m n (R: pzRingType) (M : 'M[R]_(m, n)) : (M  ^T == 0) = (M == 0).
 Proof.
 apply/eqP/eqP => [H|->]; last by rewrite trmx0.
 by rewrite -[M]trmxK H trmx0.
@@ -700,7 +700,7 @@ suff /even_col3_inj/(_ H1 H2)/eqP : M \is m.+1.-unitary.
 by rewrite mxounitaryE F1.
 Qed.
   
-Definition seq2matrix (R: ringType) m n (l: seq (seq R)) :=
+Definition seq2matrix (R: pzRingType) m n (l: seq (seq R)) :=
   \matrix_(i<m,j<n) nth 1 (nth [::] l i) j.
 
 Local Notation "''M{' l } " := (seq2matrix _ _ l).

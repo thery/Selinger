@@ -66,7 +66,7 @@ rewrite addr0 !(mxE, ffunE) -permM mulVg /= perm1 !eqxx mulr1n.
 by rewrite -(inj_eq (@perm_inj _ s)) -permM mulVg perm1 mul1r mulr1.
 Qed.
 
-Definition mcol_nz n (R : ringType) (M : 'M[R]_n) :=
+Definition mcol_nz n (R : pzRingType) (M : 'M[R]_n) :=
   [ffun i =>  odflt i [pick j | M i j != 0]].
 
 Lemma mcol_nz_nz n (M : 'M_n) i : M \is mxunitary -> M i (mcol_nz M i) != 0.
@@ -1028,7 +1028,7 @@ split=> [eqAB | -> //]; apply/matrixP=> i j.
 by move/colP/(_ i) : (eqAB j); rewrite !mxE.
 Qed.
 
-Lemma colE  (R : ringType) (m n : nat) (i : 'I_n) (A : 'M[R]_(m, n)) :
+Lemma colE  (R : pzRingType) (m n : nat) (i : 'I_n) (A : 'M[R]_(m, n)) :
        col i A =  A *m delta_mx i 0.
 Proof.
 apply/colP=> j; rewrite !mxE (bigD1 i) //= mxE !eqxx mulr1.
