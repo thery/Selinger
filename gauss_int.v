@@ -245,8 +245,6 @@ canonical property for the predicate gaussInt
 
 *)
 
-HB.howto GI subComPzRingType.
-
 HB.instance Definition _ := [Countable of GI by <:].
 HB.instance Definition _ := [SubChoice_isSubComNzRing of GI by <:].
 
