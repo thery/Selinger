@@ -19,10 +19,10 @@ Remarks on Matsumoto and Amano’s normal form"""
 build: [make "-j%{jobs}%"]
 install: [make "install"]
 depends: [
-  "coq" {(>= "8.20")}
-  "coq-mathcomp-ssreflect" {(>= "2.3.0")}
-  "coq-mathcomp-algebra" {(>= "2.3.0")}
-  "coq-mathcomp-field" {(>= "2.3.0")}
+  "coq" {(>= "9.0")}
+  "coq-mathcomp-ssreflect" {(>= "2.4.0")}
+  "coq-mathcomp-algebra" {(>= "2.4.0")}
+  "coq-mathcomp-field" {(>= "2.4.0")}
 ]
 
 tags: [

@@ -44,12 +44,12 @@ dependencies:
 
 - opam:
     name: coq-mathcomp-field
-    version: '{(>= "2.3.0")}'
+    version: '{(>= "2.4.0")}'
   description: |-
-    [MathComp field 2.3.0 or later](https://math-comp.github.io)
+    [MathComp field 2.4.0 or later](https://math-comp.github.io)
 
 tested_rocq_opam_versions:
-- version: '2.5.0-rocq-prover-9.0'
+- version: '2.4.0-rocq-prover-9.0'
   repo: 'mathcomp/mathcomp'
 
 namespace: Selinger

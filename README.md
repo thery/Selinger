@@ -21,12 +21,12 @@ Remarks on Matsumoto and Amano’s normal form
 - Author(s):
   - Laurent Théry
 - License: [MIT License](LICENSE)
-- Compatible Coq versions: 8.20 or later
+- Compatible Rocq/Coq versions: 9.0 or later
 - Additional dependencies:
-  - [MathComp ssreflect 2.3.0 or later](https://math-comp.github.io)
-  - [MathComp algebra 2.3.0 or later](https://math-comp.github.io)
-  - [MathComp field 2.3.0 or later](https://math-comp.github.io)
-- Coq namespace: `Selinger`
+  - [MathComp ssreflect 2.4.0 or later](https://math-comp.github.io)
+  - [MathComp algebra 2.4.0 or later](https://math-comp.github.io)
+  - [MathComp field 2.4.0 or later](https://math-comp.github.io)
+- Rocq/Coq namespace: `Selinger`
 - Related publication(s): none
 
 ## Building and installation instructions
