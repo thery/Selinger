@@ -3,12 +3,13 @@ Require Import s2int quantum.
 
 Set Implicit Arguments.
 Unset Strict Implicit.
-From mathcomp Require Import all_ssreflect all_algebra all_field.
+From mathcomp Require Import all_boot all_order all_algebra all_field.
 Unset Printing Implicit Defensive.
 
 Import Order.TTheory GRing.Theory Num.Theory zmodp.
 
 Import perm fingroup.
+
 Open Scope ring_scope.
 Open Scope S2I_scope.
 
@@ -54,7 +55,7 @@ Lemma bdiag_perm_mx n (bs : {ffun 'I_n -> bool}) (s : 'S_n) :
   bdiag_mx [ffun i => bs (s i)] *m perm_mx s = perm_mx s *m bdiag_mx bs.
 Proof.
 apply/matrixP=> i j; rewrite !(mxE, ffunE).
-rewrite (bigD1 ((invg s) j)) //=.
+rewrite (bigD1 (s^-1%g j)) //=.
 rewrite big1 => [|i1]; rewrite ?mulr0; last first.
   rewrite !(mxE, ffunE) -(inj_eq (@perm_inj _ s)) -permM.
   rewrite mulVg permE => /negPf->.
@@ -681,10 +682,11 @@ Proof.
 rewrite !Pauli_prod [j == _]eq_sym.
 case/or3P : (i32E i j)=> /eqP->;
   rewrite ?eqxx ?scale1r //= -subr_eq0 [j + _]addrC addrK //=.
-  by rewrite addrC addr2K /= subrK eqxx /= addrC !scalerA mul1r.
-rewrite mul1r addrC !scalerA mulrA -exprD.
-congr (_ *: _).
-by rewrite -addrAC eq_sym -subr_eq0 addrK add1n expr2 mulNr mul1r opprK mul1r.
+  by rewrite addrC addr2K /= subrK eqxx /= mul1r !expr1 scalerA [j + _]addrC.
+rewrite mul1r expr1 scalerA.
+congr (_ *: _); last by rewrite [j + _]addrC.
+rewrite mulrA -addrAC eq_sym -subr_eq0 addrK.
+by rewrite expr1 mulNr mulrN opprK !mul1r.
 Qed.
 
 Lemma Pauli_base M :
@@ -818,10 +820,10 @@ case/or3P : (i3E i) => {i}/eqP->;
   rewrite !mxE /= ?[('Re _)^*]conj_Creal ?[('Im _)^*]conj_Creal 
         ?Creal_Re ?Creal_Im //. 
 - rewrite !raddfD /= mulrC !conjCK; congr (_ + _).
-  by rewrite -[LHS]Re_conj /= !rmorphM conjCK.
+  by rewrite -[LHS]Re_conj /= !rmorphM /= conjCK.
 - rewrite raddfB /= opprB !conjCK.
   rewrite !raddfD /= mulrC ; congr (_ + _).
-  by rewrite -[LHS]Im_conj rmorphM conjCK.
+  by rewrite -[LHS]Im_conj rmorphM /= conjCK.
 - rewrite  /= !conjCK.
   have [_] := is_unitary2r H.
   move=>/eqP; rewrite mulrC addr_eq0 => /eqP-> _ _.
@@ -831,10 +833,10 @@ case/or3P : (i3E i) => {i}/eqP->;
   rewrite [('Im _)^*]conj_Creal ?Creal_Im //.
   rewrite raddfB raddfD /= opprB.
   rewrite -![in RHS]Im_conj mulrC; congr (_ + _).
-  by rewrite rmorphM conjCK.
+  by rewrite rmorphM /= conjCK.
 - rewrite raddfN /= [('Re _)^*]conj_Creal ?Creal_Re //=.
   rewrite !conjCK !raddfD /= mulrC; congr (_ + _).
-  by rewrite -[in LHS]Re_conj raddfN /= !rmorphM !conjCK.
+  by rewrite -[in LHS]Re_conj raddfN /= !rmorphM /= !conjCK.
 - rewrite !conjCK ![in RHS]raddfMn /= raddfN /=.
   rewrite [('Im _)^*]conj_Creal ?Creal_Im //=.
   have [_] := is_unitary2r H.
@@ -849,7 +851,7 @@ case/or3P : (i3E i) => {i}/eqP->;
   move=>/eqP; rewrite mulrC addr_eq0 => /eqP-> _ _ _.
   rewrite raddfN /= [('Im _)^*]conj_Creal ?Creal_Im //.
   by rewrite raddfMn /= opprK.
-rewrite !conjCK raddfB /= !rmorphM !conjCK ![_^* * _]mulrC.
+rewrite !conjCK raddfB /= !rmorphM /= !conjCK ![_^* * _]mulrC.
 apply/eqP; rewrite subr_eq addrC addrA eq_sym subr_eq; apply/eqP.
 have [_ _ _] := is_unitary2l H.
 move=>/eqP; rewrite eq_sym -subr_eq => /eqP<-.
@@ -884,15 +886,15 @@ have FNC : (forall x, (forall y : algC , x * y = y * x)%R *
 set x := ci 0 0; set y := ci 1 0; set z := ci o2 0.
 have FNCC := (FNC x, FNC y, FNC z).
 have S1 : M 1 0 * (M 1 1)^* = - (M 0 0 * (M 0 1)^*).
-  rewrite -[LHS]conjCK rmorphM conjCK mulrC.
+  rewrite -[LHS]conjCK rmorphM /= conjCK mulrC.
   have [_] := is_unitary2r H.
   move=>/eqP; rewrite addrC addr_eq0=>/eqP-> _ _.
-  by rewrite raddfN /= rmorphM conjCK mulrC.
+  by rewrite raddfN /= rmorphM /= conjCK mulrC.
 have S2 : M 0 1 * (M 1 1)^* = - (M 0 0 * (M 1 0)^*).
-  rewrite -[LHS]conjCK rmorphM conjCK mulrC.
+  rewrite -[LHS]conjCK rmorphM /= conjCK mulrC.
   have [_] := is_unitary2l H.
   move=>/eqP; rewrite addrC addr_eq0=>/eqP-> _ _.
-  by rewrite raddfN /= rmorphM conjCK mulrC.
+  by rewrite raddfN /= rmorphM /= conjCK mulrC.
 apply/eqP/eqP=> /matrixP H1; apply/matrixP=> i j.
 - case/orP : (i2E i) => {i}/eqP->; case/orP : (i2E j) => {j}/eqP->;
     rewrite !(mxE, s2E, s3E)/= ?Cl;
@@ -913,23 +915,25 @@ apply/eqP/eqP=> /matrixP H1; apply/matrixP=> i j.
        (_ :  (Z2 - Z2) + Z1 + Z1 + (X6 - X2) + (X5 - X3) +
                 (Y6 - Y4) + (Y3 -Y5) = _); last first.
       by do 60 (rewrite-?addrA; try ((congr (_ + _); [idtac]) || rewrite addrC)).
-    rewrite subrr add0r -[X6 - X2]mulrBl -[- (_  * 'i)]mulNr -Im_conj rmorphM conjCK.
+    rewrite subrr add0r -[X6 - X2]mulrBl -[- (_  * 'i)]mulNr 
+            -Im_conj rmorphM /= conjCK.
     rewrite [_^* * _]mulrC [_ * 'i]mulrC -algCrect -/X1.
-    rewrite -[X5 - _]mulrBl -[-(_ * 'i)]mulNr -Im_conj rmorphM conjCK.
+    rewrite -[X5 - _]mulrBl -[-(_ * 'i)]mulNr -Im_conj rmorphM /= conjCK.
     rewrite [_^* * _]mulrC [_ * 'i]mulrC -algCrect -/X4.
     rewrite -[Y6 - _]mulrBl -['Im _]opprK -[-'Im _]mulrN1 -sqrCi expr2 mulrA.
-    rewrite -mulNr -[_ - _ *'i]mulrBl -opprD -Re_conj rmorphM conjCK.
+    rewrite -[- (_ * 'i)]mulNr.
+    rewrite -[_ - _ *'i]mulrBl -opprD -Re_conj rmorphM /= conjCK.
     rewrite [_ + 'Re _]addrC ['Im _ * 'i]mulrC [_^* * _]mulrC -algCrect.
     rewrite !mulNr -/Y2.
     rewrite -[Y3 - _]mulrBl -[-'Im _]mulrN1 -sqrCi expr2 mulrA.
-    rewrite -[_ * 'i + _]mulrDl -Re_conj rmorphM conjCK.
+    rewrite -[_ * 'i + _]mulrDl -Re_conj rmorphM /= conjCK.
     rewrite  ['Im _ * 'i]mulrC [_^* * _]mulrC -algCrect -/Y1.
     by do 20 (rewrite-?addrA; try ((congr (_ + _); [idtac]) || rewrite addrC)).
   - rewrite -![_ * 'i * 'i]mulrA -expr2 sqrCi !Cl.
     rewrite S2 mulNr opprK.
     have [_] := is_unitary2l H.
     move=>/eqP; rewrite addrC addr_eq0 => /eqP-> _ _ .
-    rewrite /= !mulNr opprK.
+    rewrite /= !mulNr /=.
     set X1 := _ * _ * x; set X2 := _ * _ * x.
     set X3 := _ * _ * x; set X4 := _ * _ * x.
     set X5 := _ * x; set X6 := _ * x.
@@ -938,22 +942,23 @@ apply/eqP/eqP=> /matrixP H1; apply/matrixP=> i j.
     set Y5 := 'Im (M 0 1 * _) * y; set Y6 := _ * y.
     set Z1 := _ * _ * z; set Z2 := _ * _ * z.
     apply: etrans
-       (_ :  (Z2 - Z2) + Z1 + Z1 + (X6 + X2) + (X5 + X3) -
+       (_ :  (Z2 - Z2) + - Z1 + - Z1 + (X6 + X2) + (X5 + X3) -
                 (Y5 + Y3) + (Y6 + Y4) = _); last first.
       rewrite opprD.
       by do 32 (rewrite-?addrA; try ((congr (_ + _); [idtac]) || rewrite addrC)).
-    rewrite subrr add0r -[X6 + _]mulrDl -Re_conj rmorphM conjCK [_^* * _]mulrC.
+    rewrite subrr add0r -[X6 + _]mulrDl -Re_conj rmorphM /= conjCK [_^* * _]mulrC.
     rewrite [_ * 'i]mulrC -algCrect -/X4.
-    rewrite -[X5 + _]mulrDl -Re_conj rmorphM conjCK [_^* * _]mulrC.
+    rewrite -[X5 + _]mulrDl -Re_conj rmorphM /= conjCK [_^* * _]mulrC.
     rewrite [_ * 'i]mulrC -algCrect -/X1.
-    rewrite -[Y6 + _]mulrDl -Re_conj rmorphM conjCK [_^* * _]mulrC.
+    rewrite -[Y6 + _]mulrDl -Re_conj rmorphM /= conjCK [_^* * _]mulrC.
     rewrite -['Im _]opprK -[-'Im _]mulrN1 -sqrCi expr2 mulrA.
-    rewrite -mulNr -[_ + _ *'i]mulrDl -[in RHS]mulNr -Im_conj rmorphM conjCK.
+    rewrite -[- (_ * 'i)]mulNr.
+    rewrite -[_ + _ *'i]mulrDl -[in RHS]mulNr -Im_conj rmorphM /= conjCK.
     rewrite [_ + 'Re _]addrC ['Im _ * 'i]mulrC [_^* * _]mulrC.
-    rewrite -Re_conj rmorphM conjCK  [_^* * _]mulrC -algCrect -/Y1.
+    rewrite -Re_conj rmorphM /= conjCK  [_^* * _]mulrC -algCrect -/Y1.
     rewrite -[Y5 + _]mulrDl -['Im _]opprK -[-'Im _]mulrN1 -sqrCi expr2 !mulrA.
     rewrite -[-(_ * 'i)]mulNr -[_ * 'i + _]mulrDl -[-(_ * 'i)]mulNr -Im_conj.
-    rewrite rmorphM conjCK.
+    rewrite rmorphM /= conjCK.
     rewrite [_ + 'Re _]addrC ['Im _ * 'i]mulrC [_^* * _]mulrC.
     rewrite -algCrect -/Y2.
     by do 20 (rewrite-?addrA; try ((congr (_ + _); [idtac]) || rewrite addrC)).
@@ -967,10 +972,12 @@ apply/eqP/eqP=> /matrixP H1; apply/matrixP=> i j.
     set Z1 := _ * _ * z; set Z2 := M 0 1 * _ * z.
     set Z3 := M 0 0 * _ * z; set Z4 := _ * _ * z.
     do 9 (rewrite-?addrA; try ((congr (_ + _); [idtac]) || rewrite addrC)).
-    apply/eqP; rewrite subr_eq addrC addrA -subr_eq; apply/eqP.
-    rewrite opprK -!mulrDl addrC [in RHS]addrC; congr (_ * _).
-    by have [_ _ -> ->] := is_unitary2r H.
-rewrite /=.
+    rewrite !opprK.
+    do 12 (rewrite-?addrA; try ((congr (_ + _); [idtac]) || rewrite addrC)).
+    rewrite addrC -!mulrBl; congr (_ * _).
+    apply: subr0_eq; rewrite opprB addrCA !addrA -addrA -opprD [X in - X]addrC.
+   have [_ _ -> ->] := is_unitary2r H.
+   by rewrite subrr.
 case/or3P : (i3E i) => {i}/eqP->; rewrite {j} (eqP (i1E j)).
 - suff : (Mlift M *m ci) 0 0 *+2  = co 0 0 *+2.
     by move/eqP; rewrite eqrMn2r => /eqP.
@@ -981,12 +988,12 @@ case/or3P : (i3E i) => {i}/eqP->; rewrite {j} (eqP (i1E j)).
   rewrite -/x -/y -/z.
   rewrite FR !(mulrnBl, mulrnDl) -2!mulrnAl FR FI !mulr2n.
   rewrite ?raddfB ?raddfD !rmorphM /= mulrC
-            !conjCK !Dl !rmorphM !conjCK !FNI !FNCC.
+            !conjCK !Dl !rmorphM /= !conjCK !FNI !FNCC.
   rewrite ![_^* * _]mulrC.
   rewrite S2 !mulNr !opprK.
   have [_] := is_unitary2l H.
   move=>/eqP; rewrite addrC addr_eq0 => /eqP-> _ _ .
-  rewrite /= !mulNr opprK.
+  rewrite /= !mulNr.
   set X1 := _ * _ * x; set X2 := _ * _ * x.
   set X3 := _ * _ * x; set X4 := _ * _ * x.
   set Y1 := _ * _ * y; set Y2 := _ * _ * y.
@@ -1004,7 +1011,7 @@ case/or3P : (i3E i) => {i}/eqP->; rewrite {j} (eqP (i1E j)).
    rewrite -[_ * x *+ 2]mulrnAl -[_ * y *+ 2]mulrnAl.
   rewrite FR FI !mulr2n.
   rewrite ?raddfB ?raddfD !rmorphM /= mulrC
-            !conjCK !Dl !rmorphM !conjCK !FNI !FNCC.
+            !conjCK !Dl !rmorphM /= !conjCK !FNI !FNCC.
   rewrite -![_ * 'i * 'i]mulrA -expr2 sqrCi !mulrN1.
   rewrite !FNI !FNCC ![_^* * _]mulrC !mulNr.
   rewrite S2.
@@ -1014,7 +1021,7 @@ case/or3P : (i3E i) => {i}/eqP->; rewrite {j} (eqP (i1E j)).
   by do 60 (rewrite-?addrA; try ((congr (_ + _); [idtac]) || rewrite addrC)).
 have := H1 0 0; rewrite !(mxE, s2E, s3E)/= ?Cl => <-.
 rewrite FI FR -/x -/y -/z.
-rewrite !Dl !rmorphM !conjCK !FNI !FNCC ![_^* * _]mulrC.
+rewrite !Dl !rmorphM /= !conjCK !FNI !FNCC ![_^* * _]mulrC.
 by do 20 (rewrite-?addrA; try ((congr (_ + _); [idtac]) || rewrite addrC)).
 Qed.
 
@@ -1110,7 +1117,8 @@ apply/matrixP=> i j;
              divff ?(eqC_nat _ 0).
 - by rewrite (Creal_ImP _ _) ?(rpredN, rpredD, rpredM).
 - rewrite (Creal_ReP _ _) ?(rpredD, rpredM) //.
-  by rewrite -invfM -expr2 sqrtCK -mulr2n -mulr_natl divff ?(eqC_nat _ 0).
+  by rewrite -invfM -expr2 sqrtCK -mulr2n -[_ *+ 2]mulr_natl divff 
+             ?(eqC_nat _ 0).
 - by rewrite (Creal_ImP _ _) ?(rpredD, rpredM) // ?Cl.
 - rewrite (Creal_ReP _ _) ?(rpredD, rpredM) //.
   by rewrite -invfM -expr2 sqrtCK -mulr_natl divff ?(eqC_nat _ 0).
@@ -1148,7 +1156,7 @@ apply/eqP/matrixP=> i j;
    case/orP : (i2E i) => /eqP->; case/orP : (i2E j) => /eqP->;
    rewrite !(s2E, mxE) /= ?Cl //.
   by rewrite [_ * sqrtC _]mulrC divff // ?mul1r ?conjC1.
-rewrite rmorphM (CrealP _) // mulrCA -mulrA.
+rewrite rmorphM /= (CrealP _) // mulrCA -mulrA.
 rewrite -normCK -['i]mulr1 normC2_rect // expr1n.
 rewrite mulrA -invfM -expr2 sqrtCK -mulr2n mulrC divff //.
 by rewrite (eqC_nat _ 0).

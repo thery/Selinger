@@ -1,14 +1,15 @@
 From HB Require Import structures.
-From mathcomp Require Import all_ssreflect all_algebra all_field archimedean.
+From mathcomp Require Import all_boot all_order all_algebra all_field.
+From mathcomp Require Import archimedean.
 Require Import gauss_int.
 
-(*****************************************************************************)
-(*                                                                           *)
-(*                                                                           *)
-(*          Definition of the subtype a + b * sqrt(2) in algC                *)
-(*                                                                           *)
-(*                                                                           *)
-(*****************************************************************************)
+(******************************************************************************)
+(*                                                                            *)
+(*                                                                            *)
+(*          Definition of the subtype a + b * sqrt(2) in algC                 *)
+(*                                                                            *)
+(*                                                                            *)
+(******************************************************************************)
  
 
 Set Implicit Arguments.
@@ -247,12 +248,13 @@ HB.instance Definition _ :=
 Fact algS2I_sub : {morph algS2I : a b / a - b}.
 Proof. by []. Qed.
 
-Fact algS2I_multiplicative : multiplicative algS2I.
+Fact algS2I_monoid_morphism : monoid_morphism algS2I.
 Proof. by []. Qed.
 
-HB.instance Definition _ := GRing.isAdditive.Build S2I algC algS2I algS2I_sub.
+HB.instance Definition _ := 
+  GRing.isZmodMorphism.Build S2I algC algS2I algS2I_sub.
 HB.instance Definition _ :=
-  GRing.isMultiplicative.Build S2I algC algS2I algS2I_multiplicative.
+  GRing.isMonoidMorphism.Build S2I algC algS2I algS2I_monoid_morphism.
 
 Lemma algS2I_mulrn x n : algS2I (x *+ n) = (algS2I x) *+ n.
 Proof. by elim: n => //= n IH; rewrite !mulrS raddfD /= IH. Qed.
@@ -315,7 +317,8 @@ rewrite /= /conjs2i s2intA_sub // s2intB_sub //.
 by rewrite -![-(_%:~R * _)]mulNr subS2I_rect -opprD !mulNr -!raddfB.
 Qed.
 
-HB.instance Definition _ := GRing.isAdditive.Build S2I S2I conjS2I conjS2I_sub.
+HB.instance Definition _ := 
+  GRing.isZmodMorphism.Build S2I S2I conjS2I conjS2I_sub.
 
 Lemma mulS2I_rect a b c d : 
    (a + b * sqrtC 2%:R) * (c + d * sqrtC 2%:R) =
@@ -436,9 +439,9 @@ case V : (P b); last by apply: IH1.
 by rewrite rpredD ?IH1 // H1 // in_cons eqxx.
 Qed.
 
-Fact conjS2I_multiplicative : multiplicative conjS2I.
+Fact conjS2I_monoid_morphism : monoid_morphism conjS2I.
 Proof.
-(split=> [a b|]; apply/val_eqP=> /=); last first.
+(split=> [|a b]; apply/val_eqP=> /=).
    by rewrite /conjs2i (s2intA_nat 1) (s2intB_nat 1) mul0r subr0 mulrz_nat.
 rewrite /= /conjs2i s2intA_mul // s2intB_mul //.
 rewrite -![-(_%:~R * _)]mulNr mulS2I_rect !(mulNr,mulrN).
@@ -487,7 +490,7 @@ by rewrite lerD // mulr_ge0 // sqr_ge0.
 Qed.
 
 HB.instance Definition _ :=
-  GRing.isMultiplicative.Build S2I S2I conjS2I conjS2I_multiplicative.
+  GRing.isMonoidMorphism.Build S2I S2I conjS2I conjS2I_monoid_morphism.
 
 Lemma algS2I_nat n : algS2I n%:R = n%:R.
 Proof. by elim: n => //= n IH; rewrite -addn1 !natrD -IH. Qed.
@@ -701,7 +704,7 @@ Fact norm1DsQ2 : 'N (1 + sQ2) = 1%N.
 Proof.
 rewrite normS2IE.
 have -> : conjS2I (1 + sQ2) = 1 - sQ2.
-  by rewrite rmorphD rmorph1 [X in (1 + X)]conjS2I_sQ2.
+  by rewrite rmorphD /= rmorph1 conjS2I_sQ2.
 rewrite mulrC -subr_sqr expr1n sQ2K -opprB -(natrB _ (isT: 1 <= 2)%N) mulr1n.
 by rewrite (intrKfloor (-1)) abszN1.
 Qed.
@@ -917,7 +920,7 @@ rewrite tE [_ * _%:~R]mulrDl mulrAC.
 rewrite {1}(cdivz_eq za Ny) {1}(cdivz_eq zb Ny).
 rewrite subS2I_rect ![_ + cmodz _ _]addrC.
 rewrite rmorphD /= rmorphM /= addrK.
-rewrite [(_ + _)%:~R]rmorphD /= rmorphM /= addrK.
+rewrite [(cmodz _ _ + _)%:~R]rmorphD /= rmorphM /= addrK.
 set xx := _ + _.
 have sxx : xx \is a s2Int by apply/s2intP; eexists; eexists.
 rewrite s2intNormM ?s2int //.

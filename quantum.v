@@ -1,4 +1,4 @@
-From mathcomp Require Import all_ssreflect all_algebra all_field.
+From mathcomp Require Import all_boot all_order all_algebra all_field.
 Require Import s2int.
 
 Set Implicit Arguments.
@@ -183,8 +183,9 @@ Qed.
 Lemma mxs2intT n m (M : 'M_n) : (M ^T* \is m.-s2int) = (M \is m.-s2int).
 Proof.
 apply/mxs2intP/mxs2intP => H i j; have := H j i; rewrite !mxE => H1.
-  by rewrite  -[_ * _]conjCK s2Int_conj // rmorphM rmorphXn conjC_sqrt2.
-by rewrite -conjC_sqrt2 -rmorphXn -rmorphM s2Int_conj.
+  rewrite  -[_ * _]conjCK s2Int_conj //.
+  by rewrite rmorphM rmorphXn /= conjC_sqrt2.
+by rewrite -conjC_sqrt2 -rmorphXn -rmorphM /= s2Int_conj.
 Qed.
 
 Lemma mxs2int_tr n m (M : 'M_n) : M \is m.-s2int -> M^T* = M^T.
@@ -294,7 +295,7 @@ Proof.
 move=> sO.
 apply/matrixP=> i j.
 rewrite !mxE -{1}[M _ _](mulfK (sqrt2X_neq0 m)).
-rewrite rmorphM !conj_Creal ?(mulfK (sqrt2X_neq0 m)) //.
+rewrite rmorphM /= !conj_Creal ?(mulfK (sqrt2X_neq0 m)) //.
   by rewrite rpredXN // Creal_s2Int // sQ2_proof.
 by rewrite mulrC Creal_s2Int // (mxsunitary_s2int j i sO).
 Qed.
@@ -387,7 +388,7 @@ apply/andb_id2l=> /mxsunitary_s2int Hs.
 apply/mxoddP/mxoddP => [] [i [j H1]]; exists j; exists i;
      have := H1; rewrite !mxE => H2.
   rewrite  -[_ * _]conjCK odds2i_conj ?s2Int_conj //.
-  by rewrite rmorphM rmorphXn conjC_sqrt2.
+  by rewrite rmorphM /= rmorphXn /= conjC_sqrt2.
 by rewrite -conjC_sqrt2 -rmorphXn -rmorphM odds2i_conj.
 Qed.
 
@@ -410,7 +411,7 @@ have F1 j1 : 2%:R ^+ m.+1 *  (M i j1 * (M i j1)^*) =  (k * M i j1) ^+ 2.
   rewrite [RHS]expr2 -{2}(_ : k * (M i j1) ^* = k * M i j1).
     rewrite -[RHS]mulrA  [_ * (k * _)]mulrCA !mulrA -expr2.
     by rewrite -exprM mulnC exprM sqrtCK.
-  rewrite {1}/k -conjC_sqrt2 -rmorphXn -rmorphM.
+  rewrite {1}/k -conjC_sqrt2 -rmorphXn -rmorphM /=.
   by rewrite conj_Creal // Creal_s2Int // s2Int_conj.
 have : s2intB (2%:R ^+ m.+1 * 1%:R) == 0.
   by rewrite mulr1 -natrX /odds2j s2intB_nat.
@@ -448,7 +449,7 @@ have F1 j1 : 2%:R ^+ m.+1 *  (M i j1 * (M j j1)^*) =
   rewrite  -(_ : k * (M j j1) ^* = k * M j j1).
     rewrite -[RHS]mulrA  [_ * (k * _)]mulrCA !mulrA -expr2.
     by rewrite -exprM mulnC exprM sqrtCK.
-  rewrite {1}/k -conjC_sqrt2 -rmorphXn -rmorphM.
+  rewrite {1}/k -conjC_sqrt2 -rmorphXn -rmorphM /=.
   by rewrite conj_Creal // Creal_s2Int // s2Int_conj.
 have : ~~ odds2i (2%:R ^+ m.+1 * (i == j)%:R).
   case: eqP => _.
@@ -746,9 +747,9 @@ apply/andP; split.
      case/or3P: (o3E i) => /eqP->; case/or3P: (o3E j) => /eqP->;
      rewrite sum3E !mxE
             ?(mulVf, conjC0, conjC1, mul0r, mulr0, addr0, add0r, mulr1, 
-             mulrN1, mulNr, mulrN, opprK, rmorphN, oppr0) 1?addrC ?subrr //;
+             mulrN1, mulNr, mulrN, opprK, rmorphN, oppr0) 1?addrC ?subrr //=;
      rewrite !conj_Creal // -invfM // -expr2 sqrtCK
-             -[_^-1]mul1r -mulrDl mulfV // (eqC_nat 2 0).
+             -[_^-1]mul1r /= -mulrDl mulfV // (eqC_nat 2 0).
 apply/andP; split.
   by apply/forallP=> i; apply/forallP=> j; 
      case/or3P : (o3E i) => /eqP->; case/or3P : (o3E j) => /eqP->;
@@ -773,7 +774,7 @@ apply/andP; split.
      case/or3P: (o3E i) => /eqP->; case/or3P: (o3E j) => /eqP->;
      rewrite sum3E !mxE
             ?(mulVf, conjC0, conjC1, mul0r, mulr0, addr0, add0r, mulr1, 
-             mulrN1, mulNr, mulrN, opprK, rmorphN, oppr0) ?subrr //;
+             mulrN1, mulNr, mulrN, opprK, rmorphN, oppr0) ?subrr //=;
      rewrite !conj_Creal // -invfM // -expr2 sqrtCK
              -[_^-1]mul1r -mulrDl mulfV // (eqC_nat 2 0).
 apply/andP; split.
@@ -797,10 +798,10 @@ have F := algS2IP sQ2.
 have F1 : sqrtC 2%:R != 0 :> algC by rewrite sqrtC_eq0 (eqC_nat _ 0).
 have F2 : (sqrtC 2%:R)^-1 \is Creal by rewrite rpredV Creal_s2Int.
 rewrite !mxE sum3E !mxE /=.
-by case/or3P: (o3E i) => /eqP->; case/or3P: (o3E j) => /eqP-> /=;
+by  case/or3P: (o3E i) => /eqP->; case/or3P: (o3E j) => /eqP-> /=;
    rewrite ?(mulrA, mulVf, mul0r, mulr0, mul1r, mulr1, rmorph1, rmorph0, 
-            add0r, addr0) //;
-   rewrite ?(mulrN1, rmorphN, mulNr, (I, mulrN));
+            add0r, addr0) //=;
+   rewrite ?(mulrN1, rmorphN, mulNr, (I, mulrN)) /=;
    rewrite  conj_Creal // ?Creal_s2Int // -mulrDr.
 Qed.
 
@@ -830,7 +831,7 @@ rewrite !mxE sum3E !mxE /=.
 by case/or3P: (o3E i) => /eqP->; case/or3P: (o3E j) => /eqP-> /=;
    rewrite ?(mulrA, mulVf, mul0r, mulr0, mul1r, mulr1, rmorph1, rmorph0, 
             add0r, addr0) //;
-   rewrite ?(mulrN1, rmorphN, mulNr, (I, mulrN));
+   rewrite ?(mulrN1, rmorphN, mulNr, (I, mulrN)) /=;
    rewrite  conj_Creal // ?Creal_s2Int // -mulrDr.
 Qed.
 
@@ -860,7 +861,7 @@ rewrite !mxE sum3E !mxE /=.
 by case/or3P: (o3E i) => /eqP->; case/or3P: (o3E j) => /eqP-> /=;
    rewrite ?(mulrA, mulVf, mul0r, mulr0, mul1r, mulr1, rmorph1, rmorph0, 
             add0r, addr0) //;
-   rewrite ?(mulrN1, rmorphN, mulNr, (I, mulrN));
+   rewrite ?(mulrN1, rmorphN, mulNr, (I, mulrN)) /=;
    rewrite  conj_Creal // ?Creal_s2Int // -mulrDr.
 Qed.
 
