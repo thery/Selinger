@@ -1,4 +1,4 @@
-From mathcomp Require Import all_boot all_order all_algebra all_field.
+From mathcomp Require Import boot order algebra field.
 Require Import s2int.
 
 Set Implicit Arguments.
@@ -38,7 +38,7 @@ Qed.
 (* conjugate transpose *)
 Definition trCmx m n (M : 'M_(m,n)) := map_mx (fun x : algC => x ^*) (trmx M).
 
-Notation "M ^T*" := (trCmx M) (at level 10).
+Notation "M ^T*" := (trCmx M) (at level 1).
 
 Lemma trCmx_const n a : (a%:M)^T* = a^*%:M :> 'M_n.
 Proof.
@@ -137,7 +137,7 @@ rewrite trCmx_mul mulmxA -[_ *m M2 ^T*]mulmxA H2.
 by rewrite scalar_mxC -mulmxA H1 mul1mx.
 Qed.
 
-Lemma mxunitaryT n (M : 'M_n) : M ^T* \is mxunitary = (M \is mxunitary).
+Lemma mxunitaryT n (M : 'M_n) : (M ^T* \is mxunitary) = (M \is mxunitary).
 Proof.
 rewrite qualifE /mxunitary trCmxK.
 by apply/eqP/eqP=> H; rewrite (mulmxkC (@oner_neq0 _)).
@@ -149,7 +149,7 @@ Definition mxs2int {n} m :=
  [qualify M | 
    [forall i : 'I_n, forall j : 'I_n, (sqrtC 2%:R ^+ m) * (M : 'M_n) i j \is a s2Int]].
 
-Notation " m .-s2int" := (mxs2int m) (format "m .-s2int", at level 10).
+Notation " m .-s2int" := (mxs2int m) (format "m .-s2int", at level 1).
 
 Lemma mxs2intP n m  (M : 'M_n) : 
   reflect (forall i j,  (sqrtC 2%:R) ^+ m * M i j \is a s2Int) 
@@ -202,7 +202,7 @@ Definition mxodd {n} m :=
  [qualify M |
   [exists i, exists j, odds2i ((sqrtC 2%:R) ^+ m * (M : 'M_n) i j)]].
 
-Notation " m .-odd" := (mxodd m) (format "m .-odd", at level 10).
+Notation " m .-odd" := (mxodd m) (format "m .-odd", at level 1).
 
 Lemma mxodd1 n : (1 : 'M_n.+1) \is 0.-odd.
 Proof.
@@ -231,7 +231,7 @@ by rewrite negb_exists; apply/forallP.
 Qed.
 
 Lemma mxs2int_odd n m (M : 'M_n) :
-  M \is m.+1.-s2int -> M \is m.-s2int =(M \isn't m.+1.-odd).
+  M \is m.+1.-s2int -> (M \is m.-s2int) = (M \isn't m.+1.-odd).
 Proof.
 move=> /mxs2intP H.
 have [/mxoddP[i [j H1]]|/mxoddPn H1]/= := boolP (_ \is _.-odd).
@@ -249,7 +249,7 @@ Qed.
 Definition mxsunitary {n} m :=
  [qualify M |  (M \is mxunitary) &&  ((M : 'M_n) \is m.-s2int)].
 
-Notation " m .-sunitary" := (mxsunitary m) (format "m .-sunitary", at level 10).
+Notation " m .-sunitary" := (mxsunitary m) (format "m .-sunitary", at level 1).
 
 Lemma mxsunitary_unitary n m (M : 'M_n) : M \is m.-sunitary -> M \is mxunitary.
 Proof. by case/andP. Qed.
@@ -273,7 +273,8 @@ Lemma mxsunitaryM n m1 m2 (M1 M2 : 'M_n) :
   M1 *m M2 \is (m1 + m2).-sunitary.
 Proof.
 move=> /andP[H1o H1s] /andP[H2o H2s].
-by rewrite qualifE /mxsunitary mxunitaryM // mxs2intM.
+rewrite qualifE /mxunitary mxunitaryM => [//|//|].
+by rewrite mxs2intM; [exact: H1s|exact: H2s | ].
 Qed.
 
 Lemma mxsunitaryT n m (M : 'M_n) : (M ^T* \is m.-sunitary) = (M \is m.-sunitary).
@@ -295,7 +296,7 @@ Proof.
 move=> sO.
 apply/matrixP=> i j.
 rewrite !mxE -{1}[M _ _](mulfK (sqrt2X_neq0 m)).
-rewrite rmorphM /= !conj_Creal ?(mulfK (sqrt2X_neq0 m)) //.
+rewrite rmorphM /= !conj_Creal ?(mulfK (sqrt2X_neq0 m)) //; last by
   by rewrite rpredXN // Creal_s2Int // sQ2_proof.
 by rewrite mulrC Creal_s2Int // (mxsunitary_s2int j i sO).
 Qed.
@@ -303,7 +304,7 @@ Qed.
 Lemma mxsunitaryW n m1 m2  (M : 'M_n) : 
   (m1 <= m2)%N -> M \is m1.-sunitary -> M \is m2.-sunitary.
 Proof.
-by move=> H; rewrite !qualifE /mxsunitary => /andP[-> /(mxs2intW H)].
+by rewrite [in X in _ -> _ -> X]qualifE => H /andP[-> /(mxs2intW H)].
 Qed.
 
 Lemma mxsunitary0_odd n (M : 'M_n.+1) : M \is 0.-sunitary -> M \is 0.-odd.
@@ -320,7 +321,7 @@ have F1 : \sum_(k < n.+1) (M ord0 k) ^+ 2 = 1.
   apply: eq_bigr => k _.
   by rewrite expr2 conj_Creal // Creal_s2Int.
 have : odds2i 1 by rewrite /odds2i (s2intA_nat 1).
-rewrite -F1 odds2i_sum => [|i _ _]; last by rewrite rpredX.
+rewrite -F1 odds2i_sum => [i _ _|]; first by rewrite rpredX.
 rewrite big1 // => i _.
 by have := negPf (H1 i); rewrite mul1r odds2iM // => ->.
 Qed.
@@ -349,7 +350,7 @@ Definition mxounitary {n} m :=
  [qualify M |
   [&& (M : 'M_n) \is mxunitary, M \is m.-s2int & M \is m.-odd]].
 
-Notation " m .-unitary" := (mxounitary m) (format "m .-unitary", at level 10).
+Notation " m .-unitary" := (mxounitary m) (format "m .-unitary", at level 1).
 
 Lemma mxounitaryE n m  (M : 'M_n) :
    (M \is m.-unitary) = ((M \is m.-sunitary) && (M \is m.-odd)).
@@ -409,10 +410,10 @@ move=> /andP[/mxunitaryP/(_ i i)].
 rewrite sum3E eqxx /= => H /mxs2intP F0.
 have F1 j1 : 2%:R ^+ m.+1 *  (M i j1 * (M i j1)^*) =  (k * M i j1) ^+ 2.
   rewrite [RHS]expr2 -{2}(_ : k * (M i j1) ^* = k * M i j1).
-    rewrite -[RHS]mulrA  [_ * (k * _)]mulrCA !mulrA -expr2.
-    by rewrite -exprM mulnC exprM sqrtCK.
-  rewrite {1}/k -conjC_sqrt2 -rmorphXn -rmorphM /=.
-  by rewrite conj_Creal // Creal_s2Int // s2Int_conj.
+    rewrite {1}/k -conjC_sqrt2 -rmorphXn -rmorphM /=.
+    by rewrite conj_Creal // Creal_s2Int // s2Int_conj.
+  rewrite -[RHS]mulrA  [_ * (k * _)]mulrCA !mulrA -expr2.
+  by rewrite -exprM mulnC exprM sqrtCK.
 have : s2intB (2%:R ^+ m.+1 * 1%:R) == 0.
   by rewrite mulr1 -natrX /odds2j s2intB_nat.
 rewrite -H !mulrDr !F1 !s2intB_add ?[s2intB (_ ^+ _)]s2intB_mul 
@@ -447,10 +448,10 @@ rewrite sum3E => Ho.
 have F1 j1 : 2%:R ^+ m.+1 *  (M i j1 * (M j j1)^*) = 
              (k * M i j1) * (k * M j j1).
   rewrite  -(_ : k * (M j j1) ^* = k * M j j1).
-    rewrite -[RHS]mulrA  [_ * (k * _)]mulrCA !mulrA -expr2.
-    by rewrite -exprM mulnC exprM sqrtCK.
-  rewrite {1}/k -conjC_sqrt2 -rmorphXn -rmorphM /=.
-  by rewrite conj_Creal // Creal_s2Int // s2Int_conj.
+    rewrite {1}/k -conjC_sqrt2 -rmorphXn -rmorphM /=.
+    by rewrite conj_Creal // Creal_s2Int // s2Int_conj.
+  rewrite -[RHS]mulrA  [_ * (k * _)]mulrCA !mulrA -expr2.
+  by rewrite -exprM mulnC exprM sqrtCK.
 have : ~~ odds2i (2%:R ^+ m.+1 * (i == j)%:R).
   case: eqP => _.
     rewrite mulr1.
@@ -476,7 +477,7 @@ Lemma odds2i_row3_gen m (M : 'M_3) i i1 j1 k1 (k := sqrtC (2%:R) ^+ m.+1)  :
   ~~ (odds2i (k * M i i1) (+) odds2i (k * M i j1) (+) odds2i (k * M i k1)).
 Proof.
 move=> Hn i1Dj1 i1Dk1 j1Dk1.
-rewrite (_ : _ (+) _ = \big[addb/false]_j (odds2i (k * M i j))); last first.
+rewrite (_ : _ (+) _ = \big[addb/false]_j (odds2i (k * M i j))).
   rewrite (bigD1 i1) // (bigD1 j1) 1?eq_sym // 
           (bigD1 k1) ?[k1 == _]eq_sym ?i1Dk1 //=.
   rewrite big1 ?addbF ?addbA //.
@@ -485,8 +486,8 @@ rewrite (_ : _ (+) _ = \big[addb/false]_j (odds2i (k * M i j))); last first.
   rewrite (cardD1 i1) (cardD1 j1) (cardD1 k1) (cardD1 k2).
   by rewrite !inE ![k1 == _]eq_sym i1Dk1 j1Dk1 k2Dk1 k2Dj1 k2Di1 eq_sym i1Dj1.
 rewrite (bigD1 0) // (bigD1 1) // (bigD1 o2) //= big1 ?addbF ?addbA.
-  by apply: odds2i_row3 Hn.
-by case => [] [|[|[|]]].
+  by case => [] [|[|[|]]].
+by apply: odds2i_row3 Hn.
 Qed.
 
 Lemma odds2i_2col3 m (M : 'M_3) i j (k := sqrtC (2%:R) ^+ m.+1) : 
@@ -533,7 +534,7 @@ have F1 : \sum_(k < 3) (M i k) ^+ 2 = 1.
   by rewrite expr2 conj_Creal // Creal_s2Int.
 have [/eqP->//|nZM]:= boolP (M i  j == 0).
 have := congr1 s2intA F1.
-rewrite (s2intA_nat 1) /= s2intA_sum /= => [|k _ _]; last first.
+rewrite (s2intA_nat 1) /= s2intA_sum /= => [k _ _|].
   by rewrite expr2 rpredM.
 rewrite (bigD1 j) //= => H1.
 suff /s2intA_sqrt_eq1-> : s2intA (M i j ^+ 2) = 1 by [].
@@ -906,8 +907,8 @@ case: eqP => [E1|/eqP D1].
   have /F2 H2 : ecol m.+1 M + 2%:R != ecol m.+1 M.
     by rewrite addrC -subr_eq0 addrK.
   have H3 : Tx ^T* * M \is m.+2.-sunitary.
-    by rewrite -[m.+2]add1n mxsunitaryM //
-               mxsunitaryT ?mxounitary_sunitary ?mxounitary_Tx.
+    rewrite -[m.+2]add1n mxsunitaryM => [ |//|//].
+    by rewrite mxsunitaryT ?mxounitary_sunitary ?mxounitary_Tx.
   have F3 : Tx ^T* * M \isn't m.+2.-odd.
     apply/negP=> F3.
     have Hos2 : Tx ^T* * M \is m.+2.-unitary by rewrite mxounitaryE H3.
@@ -935,8 +936,8 @@ rewrite  TxT_mul_row /= => /s2intP [a [b Hab]].
 have : odds2i (k * M 0 (ecol m.+1 M + 1)).
   by rewrite (mxounitary_odds2i _ _ Hos) eq_sym D1 addrC -subr_eq0 addrK.
 rewrite {1}[k]exprS -mulrA Hab odds2iM ?sqrt2_S2I //.
-  by rewrite (negPf odds2i_sQ2).
-by apply/s2intP; exists a; exists b.
+  by apply/s2intP; exists a; exists b.
+by rewrite (negPf odds2i_sQ2).
 Qed.
 
 Lemma mxounitaryS_TxT m (M : 'M_3) :
@@ -964,7 +965,7 @@ have Py : y \is a s2Int by apply: mxsunitary_s2int Hn.
 have : odds2i (x + y).
   rewrite /x /y TxT_mul_row /= TxT_mul_row /=. 
   rewrite !mulrDr !mulrN [_ * _ + _]addrC addrA addrK -mulrDr.
-  rewrite (_ : ?[x] + ?x = 2%:R * ?x); last by rewrite mulrDl mul1r.
+  rewrite (_ : ?[x] + ?x = 2%:R * ?x); first by rewrite mulrDl mul1r.
   rewrite -{1}[2%:R]sqrtCK !mulrA -exprSr mulfK //.
   by rewrite (mxounitary_odds2i _  _ Hos) He /=  addrC -subr_eq0 addrK.
 rewrite odds2iD // (negPf Ex) /= => Oy.
@@ -1006,8 +1007,8 @@ case: eqP => [E1|/eqP D1].
   have /F2 H2 : ecol m.+1 M + 2%:R != ecol m.+1 M.
     by rewrite addrC -subr_eq0 addrK.
   have H3 : Ty ^T* * M \is m.+2.-sunitary.
-    by rewrite -[m.+2]add1n mxsunitaryM //
-               mxsunitaryT ?mxounitary_sunitary  ?mxounitary_Ty.
+    rewrite -[m.+2]add1n mxsunitaryM => [|//|//].
+    by rewrite mxsunitaryT ?mxounitary_sunitary  ?mxounitary_Ty.
   have F3 : Ty ^T* * M \isn't m.+2.-odd.
     apply/negP=> F3.
     have Hos2 : Ty ^T* * M \is m.+2.-unitary by rewrite mxounitaryE H3.
@@ -1035,10 +1036,9 @@ rewrite  TyT_mul_row /= => /s2intP [a [b Hab]].
 have : odds2i (k * M 1 (ecol m.+1 M + 1)).
   by rewrite (mxounitary_odds2i _ _ Hos) eq_sym D1 addrC -subr_eq0 addrK.
 rewrite {1}[k]exprS -mulrA Hab odds2iM ?sqrt2_S2I //.
-  by rewrite (negPf odds2i_sQ2).
-by apply/s2intP; exists a; exists b.
+  by apply/s2intP; exists a; exists b.
+by rewrite (negPf odds2i_sQ2).
 Qed.
-
 
 Lemma mxounitaryS_TyT m (M : 'M_3) :
    M \is m.+2.-unitary ->  Ty^T* * M \isn't m.-sunitary.
@@ -1066,7 +1066,7 @@ have : odds2i (x + y).
   rewrite /x /y TyT_mul_row /= TyT_mul_row /=. 
   rewrite mulrBr !mulrDr mulrN -/k [X in odds2i(_ + _ + X)]addrC.
   rewrite addrA subrK -mulrDr.
-  rewrite (_ : ?[x] + ?x = 2%:R * ?x); last by rewrite mulrDl mul1r.
+  rewrite (_ : ?[x] + ?x = 2%:R * ?x); first by rewrite mulrDl mul1r.
   rewrite -{1}[2%:R]sqrtCK !mulrA -exprSr mulfK //.
   by rewrite (mxounitary_odds2i _  _ Hos) He /=  addrC -subr_eq0 addrK.
 rewrite odds2iD // (negPf Ex) /= => Oy.
@@ -1108,8 +1108,8 @@ case: eqP => [E1|/eqP D1].
   have /F2 H2 : ecol m.+1 M + 2%:R != ecol m.+1 M.
     by rewrite addrC -subr_eq0 addrK.
   have H3 : Tz ^T* * M \is m.+2.-sunitary.
-    by rewrite -[m.+2]add1n mxsunitaryM // 
-               mxsunitaryT ?mxounitary_sunitary ?mxounitary_Tz.
+    rewrite -[m.+2]add1n mxsunitaryM => [|//|//]. 
+    by rewrite mxsunitaryT ?mxounitary_sunitary ?mxounitary_Tz.
   have F3 : Tz ^T* * M \isn't m.+2.-odd.
     apply/negP=> F3.
     have Hos2 : Tz ^T* * M \is m.+2.-unitary by rewrite mxounitaryE H3.
@@ -1137,8 +1137,8 @@ rewrite  TzT_mul_row /= => /s2intP [a [b Hab]].
 have : odds2i (k * M o2 (ecol m.+1 M + 1)).
   by rewrite (mxounitary_odds2i _ _ Hos) eq_sym D1 addrC -subr_eq0 addrK.
 rewrite {1}[k]exprS -mulrA Hab odds2iM ?sqrt2_S2I //.
-  by rewrite (negPf odds2i_sQ2).
-by apply/s2intP; exists a; exists b.
+  by apply/s2intP; exists a; exists b.
+by rewrite (negPf odds2i_sQ2).
 Qed.
 
 Lemma mxounitaryS_TzT m (M : 'M_3) :
@@ -1167,7 +1167,7 @@ have : odds2i (x + y).
   rewrite /x /y TzT_mul_row /= TzT_mul_row /=.
   rewrite !mulrDr !mulrN -/k [X in odds2i(X + _)]addrC.
   rewrite addrA addrK -mulrDr.
-  rewrite (_ : ?[x] + ?x = 2%:R * ?x); last by rewrite mulrDl mul1r.
+  rewrite (_ : ?[x] + ?x = 2%:R * ?x); first by rewrite mulrDl mul1r.
   rewrite -{1}[2%:R]sqrtCK !mulrA -exprSr mulfK //.
   by rewrite (mxounitary_odds2i _  _ Hos) He /=  addrC -subr_eq0 addrK.
 rewrite odds2iD // (negPf Ex) /= => Oy.
@@ -1218,19 +1218,19 @@ move: kDj.
 case/or3P : (o3E j) => /eqP-> kDj ->; rewrite expr1n.
 - rewrite -[1%:R]addr0.
   move/eqP/addrI/eqP.
-  rewrite addr_ss_eq0 ?sqr_ge0 ?normr_ge0 //; last by rewrite !exprn_ge0.
+  rewrite addr_ss_eq0 ?sqr_ge0 ?normr_ge0 //; first by rewrite !exprn_ge0.
   rewrite !sqrf_eq0 !normr_eq0 => /andP[/eqP H2 /eqP H3] _.
   move: kDj.
   by case/or3P : (o3E k) => /eqP->; rewrite ?eqxx.
 - rewrite addrCA -[1%:R]addr0.
   move/eqP/addrI/eqP.
-  rewrite addr_ss_eq0 ?sqr_ge0 ?normr_ge0 //; last by rewrite !exprn_ge0.
+  rewrite addr_ss_eq0 ?sqr_ge0 ?normr_ge0 //; first by rewrite !exprn_ge0.
   rewrite !sqrf_eq0 !normr_eq0 => /andP[/eqP H2 /eqP H3] _.
   move: kDj.
   by case/or3P : (o3E k) => /eqP->; rewrite ?eqxx.
 rewrite !addrA -[1%:R]add0r.
 move/eqP/addIr/eqP.
-rewrite addr_ss_eq0 ?sqr_ge0 ?normr_ge0 //; last by rewrite !exprn_ge0.
+rewrite addr_ss_eq0 ?sqr_ge0 ?normr_ge0 //; first by rewrite !exprn_ge0.
 rewrite !sqrf_eq0 !normr_eq0 => /andP[/eqP H2 /eqP H3] _.
 move: kDj.
 by case/or3P : (o3E k) => /eqP->; rewrite ?eqxx.
@@ -1305,7 +1305,6 @@ by case/or3P : (o3E (erow m.+1 M)) => /eqP-> //;
    case/or3P : (o3E (ecol m.+1 M)) => /eqP->.
 Qed.
 
-
 Lemma mxounitary_Tx_sunitary m (M : 'M_3) :
   M \is m.+1.-unitary -> (Tx * M \is m.-sunitary) = (erow m.+1 M == 0).
 Proof.
@@ -1363,8 +1362,8 @@ rewrite  Tx_mul_row eqxx => /s2intP [a [b Hab]].
 have : odds2i (k * M 0 (ecol m.+1 M + 1)).
   by rewrite (mxounitary_odds2i _ _ Hos) eq_sym D1 addrC -subr_eq0 addrK.
 rewrite {1}[k]exprS -mulrA Hab odds2iM ?sqrt2_S2I //.
-  by rewrite (negPf odds2i_sQ2).
-by apply/s2intP; exists a; exists b.
+  by apply/s2intP; exists a; exists b.
+by rewrite (negPf odds2i_sQ2).
 Qed.
 
 Lemma Ty_mul (M : 'M[algC]_3) :
@@ -1488,8 +1487,8 @@ rewrite  Ty_mul_row eqxx => /s2intP [a [b Hab]].
 have : odds2i (k * M 1 (ecol m.+1 M + 1)).
   by rewrite (mxounitary_odds2i _ _ Hos) eq_sym D1 addrC -subr_eq0 addrK.
 rewrite {1}[k]exprS -mulrA Hab odds2iM ?sqrt2_S2I //.
-  by rewrite (negPf odds2i_sQ2).
-by apply/s2intP; exists a; exists b.
+  by apply/s2intP; exists a; exists b.
+by rewrite (negPf odds2i_sQ2).
 Qed.
 
 Lemma Tz_mul (M : 'M[algC]_3) :
@@ -1613,8 +1612,8 @@ rewrite  Tz_mul_row eqxx => /s2intP [a [b Hab]].
 have : odds2i (k * M o2 (ecol m.+1 M + 1)).
   by rewrite (mxounitary_odds2i _ _ Hos) eq_sym D1 addrC -subr_eq0 addrK.
 rewrite {1}[k]exprS -mulrA Hab odds2iM ?sqrt2_S2I //.
-  by rewrite (negPf odds2i_sQ2).
 by apply/s2intP; exists a; exists b.
+  by rewrite (negPf odds2i_sQ2).
 Qed.
 
 Lemma Tx_mul_Ty_neq m (M : 'M[algC]_3) : M \is m.-sunitary -> Tx * M != Ty * M.
@@ -1694,7 +1693,7 @@ rewrite /getM; set j := erow m M.
 by case/or3P : (o3E j) => /eqP->; rewrite  !(tnth_nth Tx) /= ?eqxx ?orbT.
 Qed.
  
-Definition reduceT m (M : 'M[algC]_3) := getM m M ^T* * M.
+Definition reduceT m (M : 'M[algC]_3) := (getM m M) ^T* * M.
 
 Fixpoint reduceTs n m M := 
   if n is n1.+1 then reduceTs n1 m.-1 (reduceT m M) else M.
@@ -1733,7 +1732,8 @@ Lemma mxounitary_reduceTs_rec m n (M : 'M_3) :
   M \is (m + n).-unitary -> reduceTs n (m + n) M \is m.-unitary.
 Proof.
 elim: n m M => [m M |n IH m M HO]; first by rewrite addn0.
-by rewrite addnS /= IH // mxounitary_reduceT // -addnS.
+rewrite addnS /= IH; last by [].
+by rewrite mxounitary_reduceT -?addnS.
 Qed.
 
 Lemma mxounitary_reduceTs m (M : 'M_3) : 
@@ -1743,46 +1743,52 @@ Proof. by rewrite {1 3} [m]/(0 + m)%N => /mxounitary_reduceTs_rec. Qed.
 Lemma mxounitary0_Tx (M : 'M_3) : M \is 0.-unitary -> Tx * M \is 1.-unitary.
 Proof.
 move=> Hos; have Hn := mxounitary_sunitary Hos.
-rewrite mxounitaryE mxsunitary0_Tx_odd ?andbT //.
-by rewrite  (@mxsunitaryM _ 1 0) // mxounitary_sunitary // mxounitary_Tx.
+rewrite mxounitaryE mxsunitary0_Tx_odd ?andbT => [//|].
+rewrite (@mxsunitaryM _ 1 0) => [|//|//].
+by rewrite mxounitary_sunitary ?mxounitary_Tx.
 Qed.
 
 Lemma mxounitary_Tx_mul m (M : 'M_3) :
-  M \is m.+1.-unitary -> Tx * M \is m.+2.-unitary = (erow m.+1  M != 0).
+  M \is m.+1.-unitary -> (Tx * M \is m.+2.-unitary) = (erow m.+1  M != 0).
 Proof.
 move=> Hos; have Hn := mxounitary_sunitary Hos.
-rewrite mxounitaryE mxounitary_Tx_odd // (@mxsunitaryM _ 1 m.+1) //.
-by rewrite mxounitary_sunitary // mxounitary_Tx.
+rewrite mxounitaryE mxounitary_Tx_odd => [//|].
+rewrite (@mxsunitaryM _ 1 m.+1) => [|//|//].
+by rewrite mxounitary_sunitary ?mxounitary_Tx.
 Qed.
 
 Lemma mxounitary0_Ty (M : 'M_3) : M \is 0.-unitary -> Ty * M \is 1.-unitary.
 Proof.
 move=> Hos; have Hn := mxounitary_sunitary Hos.
-rewrite mxounitaryE mxsunitary0_Ty_odd ?andbT //.
-by rewrite  (@mxsunitaryM _ 1 0) // mxounitary_sunitary // mxounitary_Ty.
+rewrite mxounitaryE mxsunitary0_Ty_odd ?andbT => [//|].
+rewrite  (@mxsunitaryM _ 1 0) => [|//|//].
+by rewrite mxounitary_sunitary ?mxounitary_Ty.
 Qed.
 
 Lemma mxounitary_Ty_mul m (M : 'M_3) : 
-  M \is m.+1.-unitary -> Ty * M \is m.+2.-unitary = (erow m.+1  M != 1).
+  M \is m.+1.-unitary -> (Ty * M \is m.+2.-unitary) = (erow m.+1  M != 1).
 Proof.
 move=> Hos; have Hn := mxounitary_sunitary Hos.
-rewrite mxounitaryE mxounitary_Ty_odd // (@mxsunitaryM _ 1 m.+1) //.
-by rewrite mxounitary_sunitary // mxounitary_Ty.
+rewrite mxounitaryE mxounitary_Ty_odd => [//|].
+rewrite (@mxsunitaryM _ 1 m.+1) => [|//|//].
+by rewrite mxounitary_sunitary ?mxounitary_Ty.
 Qed.
 
 Lemma mxounitary0_Tz (M : 'M_3) : M \is 0.-unitary -> Tz * M \is 1.-unitary.
 Proof.
 move=> Hos; have Hn := mxounitary_sunitary Hos.
-rewrite mxounitaryE mxsunitary0_Tz_odd ?andbT //.
-by rewrite  (@mxsunitaryM _ 1 0) // mxounitary_sunitary // mxounitary_Tz.
+rewrite mxounitaryE mxsunitary0_Tz_odd ?andbT => [//|].
+rewrite  (@mxsunitaryM _ 1 0) => [|//|//].
+by rewrite mxounitary_sunitary ?mxounitary_Tz.
 Qed.
 
 Lemma mxounitary_Tz_mul m (M : 'M_3) : 
-  M \is m.+1.-unitary -> Tz * M \is m.+2.-unitary = (erow m.+1  M != o2).
+  M \is m.+1.-unitary -> (Tz * M \is m.+2.-unitary) = (erow m.+1  M != o2).
 Proof.
 move=> Hos; have Hn := mxounitary_sunitary Hos.
-rewrite mxounitaryE mxounitary_Tz_odd // (@mxsunitaryM _ 1 m.+1) //.
-by rewrite mxounitary_sunitary // mxounitary_Tz.
+rewrite mxounitaryE mxounitary_Tz_odd => [//|].
+rewrite (@mxsunitaryM _ 1 m.+1) => [|//|//].
+by rewrite mxounitary_sunitary ? mxounitary_Tz.
 Qed.
 
 Lemma erow_Tx0 M : M \is 0.-unitary -> erow 1 (Tx * M) = 0.
@@ -1809,8 +1815,8 @@ apply: even_row3_erow F _.
 apply/forallP => x.
 rewrite Tx_mul_row eqxx exprS -mulrA.
 rewrite odds2iM  ?sQ2_proof //.
-  by rewrite ?negb_and ?odds2i_sQ2.
-by exact: (mxounitary_s2int _ _ HM).
+  by exact: (mxounitary_s2int _ _ HM).
+by rewrite ?negb_and ?odds2i_sQ2.
 Qed.
 
 Lemma erow_Ty0 M : M \is 0.-unitary -> erow 1 (Ty * M) = 1.
@@ -1837,8 +1843,8 @@ apply: even_row3_erow F _.
 apply/forallP => x.
 rewrite Ty_mul_row eqxx exprS -mulrA.
 rewrite odds2iM  ?sQ2_proof //.
-  by rewrite ?negb_and ?odds2i_sQ2.
-by exact: (mxounitary_s2int _ _ HM).
+  by exact: (mxounitary_s2int _ _ HM).
+by rewrite ?negb_and ?odds2i_sQ2.
 Qed.
 
 Lemma erow_Tz0 M : M \is 0.-unitary -> erow 1 (Tz * M) = o2.
@@ -1865,8 +1871,8 @@ apply: even_row3_erow F _.
 apply/forallP => x.
 rewrite Tz_mul_row eqxx exprS -mulrA.
 rewrite odds2iM  ?sQ2_proof //.
-  by rewrite ?negb_and ?odds2i_sQ2.
-by exact: (mxounitary_s2int _ _ HM).
+  by exact: (mxounitary_s2int _ _ HM).
+by rewrite ?negb_and ?odds2i_sQ2.
 Qed.
 
 Fixpoint Tn n : 'M_3 := 
@@ -1887,15 +1893,15 @@ Qed.
 
 End Quantum.
 
-Notation "M ^T*" := (trCmx M) (at level 10).
+Notation "M ^T*" := (trCmx M) (at level 1).
 
-Notation " m .-s2int" := (mxs2int m) (format "m .-s2int", at level 10).
+Notation " m .-s2int" := (mxs2int m) (format "m .-s2int", at level 1).
 
-Notation " m .-odd" := (mxodd m) (format "m .-odd", at level 10).
+Notation " m .-odd" := (mxodd m) (format "m .-odd", at level 1).
 
-Notation " m .-sunitary" := (mxsunitary m) (format "m .-sunitary", at level 10).
+Notation " m .-sunitary" := (mxsunitary m) (format "m .-sunitary", at level 1).
 
-Notation " m .-unitary" := (mxounitary m) (format "m .-unitary", at level 10).
+Notation " m .-unitary" := (mxounitary m) (format "m .-unitary", at level 1).
 
 Notation "''M{' l } " := (seq2matrix _ _ l).
 

@@ -1,5 +1,5 @@
 From HB Require Import structures.
-From mathcomp Require Import all_boot all_order all_algebra all_field.
+From mathcomp Require Import boot order algebra field.
 From mathcomp Require Import archimedean.
 Require Import gauss_int.
 
@@ -127,14 +127,14 @@ have rE : root (map_poly ratr p) x.
 suff gAE : s2intA x = a.
   suff -> : s2intB x = b by rewrite gAE.
   rewrite /s2intB gAE Eab -[a%:~R + _ ]addrC addrK.
-  rewrite exprMn sqrtCK mulfK ?(eqr_nat _ _ 0) // pmulr_llt0; last first.
+  rewrite exprMn sqrtCK mulfK ?(eqr_nat _ _ 0) // pmulr_llt0.
     by rewrite sqrtC_gt0 (ltr_nat _ 0).
   rewrite (ltr_int _ _ 0).
   case: (lerP 0 b) => [H|/ltW H].
   rewrite mul1r sqrCK ?intrKfloor // (ler_int _ 0) //=.
   rewrite mulNr mul1r -[_%:~R]opprK exprNn -signr_odd mul1r sqrCK ?oppr_ge0 //.
-    by rewrite floorN  ?intr_int // opprK ?intrKfloor // (ler_int _ 0).
-  by rewrite (ler_int _ _ 0).
+    by rewrite (ler_int _ _ 0).
+  by rewrite floorN  ?intr_int // opprK ?intrKfloor // (ler_int _ 0).
 rewrite /s2intA.
 case: (minCpolyP x) (size_minCpoly x) (root_minCpoly x) rE
      => /= q [-> qM /(_ p) ->].
@@ -152,7 +152,7 @@ rewrite size_map_poly leq_eqVlt eq_sym => /orP[/eqP sZ H1 H2|H1 H2].
   rewrite addr_eq0 => /eqP HH.
   have /eqP[] := rat_irr2  ((u + a%:~R) / b%:~R).
   rewrite -[LHS]ratCK rmorphXn rmorphM /= rmorphD /= ratr_int // HH.
-  rewrite mulNr exprNn -signr_odd mul1r [ratr _]rmorphV /=; last first.
+  rewrite mulNr exprNn -signr_odd mul1r [ratr _]rmorphV /=.
     by rewrite unitfE (eqr_int _ _ 0).
   rewrite ratr_int [_%:~R * _]mulrC mulfK ?(eqr_int _ _ 0) //.
   by rewrite sqrtCK -[2%:R]ratr_nat ratCK.
@@ -162,8 +162,8 @@ rewrite sP => H4.
 rewrite eqn_leq H4 H1.
 have /eqP<- : p == q.
   rewrite eq_sym -eqp_monic // -1?dvdp_size_eqp //.
-    by rewrite sP eqn_leq H4 H1.
-  by rewrite qualifE /= lead_coefE (@PolyK _ 0).
+    by rewrite qualifE /= lead_coefE (@PolyK _ 0).
+  by rewrite sP eqn_leq H4 H1.
 have -> : (map_poly ratr p)`_1 = ratr (- (2%:R * ar)) :> algC.
   by rewrite coef_map_id0 ?raddf0 // (@PolyK _ 0).
 rewrite raddfN /= mulNr opprK rmorphM /= ratr_nat.
@@ -557,7 +557,7 @@ rewrite !s2intA_int !s2intB_int mulr0 subr0 sub0r raddfN mulNr opprK /=.
 by rewrite eq_sym // [_ == _]algS2IP.
 Qed.
 
-Notation " a ^@ " := (conjs2i a) (at level 10).
+Notation " a ^@ " := (conjs2i a) (at level 1).
 
 Definition s2intNorm (x : algC) := x * x^@.
 
@@ -720,7 +720,7 @@ have F1 : 1 + sQ2 \is a GRing.unit.
 apply: (iffP idP) => [|[b [i->]]]; last first.
   rewrite normS2IM normS2IX normS2IN normS2I1.
   rewrite exp1n mul1n normS2IE rmorphXz //=.
-  rewrite -rmorphM -exprzMl //=; last first.
+  rewrite -rmorphM -exprzMl //=.
     by rewrite -normS2I_unit normS2I_conj norm1DsQ2.
   rewrite rmorphD /= rmorph1 conjS2I_sQ2.
   rewrite mulrC -subr_sqr expr1n sQ2K -opprB -(natrB _ (isT: 1 <= 2)%N) mulr1n.
@@ -754,9 +754,9 @@ have /andP[F2 F3] : b <= a < 2%:R * b.
   have F1a : `|a ^ 2 - 2%:R * b ^ 2| = 1.
     by rewrite -abszE -[X in _ = Posz X](eqP Nx) F0a.
   have : `|a ^ 2 - 2%:R * b ^ 2| <= b ^ 2 by rewrite F1a exprn_ege1.
-  rewrite ler_norml (_ : - b ^ 2 = b ^ 2 - 2%:R * b ^ 2); last first.
+  rewrite ler_norml (_ : - b ^ 2 = b ^ 2 - 2%:R * b ^ 2).
     by rewrite mulrDl mul1r opprD addrA subrr add0r.
-  rewrite lerD2r -subr_ge0 subr_sqr pmulr_lge0; last first.
+  rewrite lerD2r -subr_ge0 subr_sqr pmulr_lge0.
     by rewrite (lt_le_trans HP) // -[X in X <= _]add0r lerD.
   rewrite subr_ge0 => /andP[->/= HH].
   have : a ^ 2  < (2%:R * b) ^ 2.
@@ -785,9 +785,9 @@ case: (ltrgtP (s2intA x) 0) => HH; last first.
   case: (IH y) => [|||c [i Hci]].
   - rewrite ltnS in Hs; rewrite yB (leq_trans _ Hs) //.
     rewrite -ltz_nat -/b !gez0_abs ?subr_ge0 //.
-    - by rewrite ltrBlDl -[b]mul1r -mulrDl.
     - by rewrite ltW.
-   by rewrite yB subr_ge0.
+    - by rewrite ltrBlDl -[b]mul1r -mulrDl.
+    by rewrite yB subr_ge0.
   - rewrite normS2IM normS2IEAB (eqP Nx).
     rewrite -opprB normS2IN -normS2I_conj rmorphB /= rmorph1 conjS2I_sQ2 opprK.
     by rewrite norm1DsQ2.
@@ -809,8 +809,8 @@ have yA : s2intA y = a - 2%:R * b.
 case: (IH y) => [|||c [i Hci]].
 - rewrite ltnS in Hs; rewrite yB (leq_trans _ Hs) //.
   rewrite -ltz_nat -/b !gez0_abs ?subr_ge0 //.
-  - by rewrite ltrBlDl -[b]mul1r -mulrDl.
   - by rewrite ltW.
+  - by rewrite ltrBlDl -[b]mul1r -mulrDl.
   by rewrite yB subr_ge0.
 - by rewrite normS2IM normS2IN normS2IEAB (eqP Nx) norm1DsQ2.
 exists (~~ c); exists (i - 1).
@@ -926,7 +926,7 @@ have sxx : xx \is a s2Int by apply/s2intP; eexists; eexists.
 rewrite s2intNormM ?s2int //.
 have /= -> := s2intNormE (S2Iof sxx).
 rewrite floorM ?intr_int ?s2intNormCint // abszM.
-rewrite mulnC ltn_pmul2l; last by rewrite lt0n normS2I_eq0.
+rewrite mulnC ltn_pmul2l; first by rewrite lt0n normS2I_eq0.
 rewrite s2intA_rect s2intB_rect intrKfloor.
 set x1 : int := _ ^+ 2; set x2 : int := _ ^+ 2.
 apply: leq_ltn_trans (_ : (`|x1| + 2 * `|x2| < _)%N).
@@ -1221,7 +1221,7 @@ move=> x y z /dvdS2IP[qx -> /dvdS2IP[qy ->]].
 by apply/dvdS2IP; exists (qy * qx); rewrite mulrA.
 Qed.
 
-Lemma dvdS2I_gcd x y z : x %| gcdS2I y z = (x %| y) && (x %| z).
+Lemma dvdS2I_gcd x y z : (x %| gcdS2I y z) = (x %| y) && (x %| z).
 Proof.
 apply/idP/andP=> [dv_xyz | [dv_xy dv_xz]].
   by rewrite ?(dvdS2I_trans dv_xyz) ?dvdS2I_gcdl ?dvdS2I_gcdr.
@@ -1484,7 +1484,7 @@ Qed.
 Lemma mulS2I_gcdl x y z : gcdS2I y z * x %= gcdS2I (y * x) (z * x).
 Proof. by rewrite ![_ * x]mulrC mulS2I_gcdr. Qed.
 
-Lemma dvdS2I_lcm d1 d2 x : lcmS2I d1 d2 %| x = (d1 %| x) && (d2 %| x).
+Lemma dvdS2I_lcm d1 d2 x : (lcmS2I d1 d2 %| x) = (d1 %| x) && (d2 %| x).
 Proof.
 have [/eqP->|nZd1] := boolP (d1 == 0).
   by rewrite lcm0S2I dvd0S2I; case: eqP => //->; rewrite dvdS2I0.
@@ -1552,7 +1552,7 @@ Qed.
 Lemma odds2i_dvd (x : S2I) : ~~ odds2i x = (sQ2 %| x).
 Proof.
 apply/idP/dvdS2IP=> [/oddzN_div[q Hq]|[q->]]; last first.
-  rewrite rmorphM odds2iM  //=; last by have := algS2IP sQ2.
+  rewrite rmorphM odds2iM  //=; first by have := algS2IP sQ2.
   have /eqP := algS2IP x.
   by rewrite (negPf odds2i_sQ2) andbF.
 pose r : algC := (s2intB x)%:~R + q%:~R * sqrtC 2%:R.

@@ -1,5 +1,5 @@
 From HB Require Import structures.
-From mathcomp Require Import all_boot all_order all_algebra all_field.
+From mathcomp Require Import boot order algebra field.
 From mathcomp Require Import archimedean.
 Set Implicit Arguments.
 Unset Strict Implicit.
@@ -79,9 +79,9 @@ rewrite {1}[x]algCrect conjC_rect ?Creal_Re ?Creal_Im //.
 have F : (x^* * x)^-1 \is Creal.
   by rewrite rpredV CrealE rmorphM /= conjCK mulrC.
 rewrite mulrBl -mulrN -['i * _ * _]mulrA Im_rect ?normCKC //.
-- by rewrite mulrN.
 - by rewrite rpredM ?Creal_Re.
-by rewrite mulrN rpredN rpredM  // Creal_Im.
+- by rewrite mulrN rpredN rpredM  // Creal_Im.
+by rewrite mulrN.
 Qed.
 
 Lemma algRe_div (x y : algC) : 
@@ -149,8 +149,7 @@ have [mLe|eLm] := boolP (2%:R * (_ %% _)%Z <= `|_|).
   by rewrite [`|(_ %% _)%Z|]ger0_norm // modz_ge0.
 rewrite [_ * y]mulrDl opprD addrA {1}(divz_eq x y) [_ * _ + _]addrC addrK.
 have F := ltz_mod x yNz.
-rewrite -normrEsign ler0_norm; last first.
-  by rewrite subr_le0; apply: ltW.
+rewrite -normrEsign ler0_norm; first by rewrite subr_le0; apply: ltW.
 rewrite mulrN mulrBr opprB lterBDl (_ : 2%:R = 1 + 1) //.
 by rewrite mulrDl mul1r lerD // ltW // ltNge.
 Qed.
@@ -174,7 +173,7 @@ Definition gaussInt_subdef : pred algC :=
 Definition gaussInt := [qualify a x | gaussInt_subdef x].
 
 Lemma gaussIntE x : 
-  x \is a gaussInt = (('Re x \is a Num.int) && ('Im x \is a Num.int)).
+  (x \is a gaussInt) = (('Re x \is a Num.int) && ('Im x \is a Num.int)).
 Proof. by []. Qed.
 
 (**
@@ -427,7 +426,7 @@ Qed.
 Lemma normGIE (x : GI) : ('N(x) =  Num.truncn (`|'Re (val x)|)%R ^ 2 +
                                    Num.truncn (`|'Im (val x)|)%R ^ 2)%N.
 Proof.
-rewrite /normGI gaussNormE normC2_Re_Im truncnD ?natr_exp_even //; last first.
+rewrite /normGI gaussNormE normC2_Re_Im truncnD ?natr_exp_even //.
   by rewrite qualifE /= natr_ge0 // natr_exp_even.
 by rewrite -!truncnX ?natr_norm_int // !intr_normK.
 Qed.
@@ -483,7 +482,7 @@ transitivity (gaussNorm (val x) == 1).
     by move=> gNx; apply/unitrPr; exists (conjGI x); apply: val_inj.
   move=> x_unit; have /(congr1 (gaussNorm \o val)) /= /eqP := mulrV x_unit.
   by rewrite gaussNormM gaussNorm1 Cnat_mul_eq1 //= => /andP [/eqP].
-rewrite (@mem_unity_roots _ 4 (map my [:: 1; -1; 'i; -'i])) //; last 2 first.
+rewrite (@mem_unity_roots _ 4 (map my [:: 1; -1; 'i; -'i])) //.
 - rewrite /= !unity_rootE /= [(- 'i) ^+ _]exprNn expr1n  -signr_odd ?expr0.
   by rewrite -[4%N]/(2 * 2)%N exprM sqrCi -signr_odd ?expr0 mulr1 !eqxx.
 - rewrite /= ![my _](iE, oneE, N1E, NiE).
@@ -608,13 +607,13 @@ set Uy := Num.floor _.
 have UxRe : Ux%:~R = 'Re (algGI x / algGI y * ('N y)%:R).
   rewrite algReM ['Re _%:R](Creal_ReP _ _) ?qualifE /= ?ler0n //.
   rewrite ?['Im _%:R](Creal_ImP _ _) ?qualifE /= ?ler0n // mulr0 subr0.
-  rewrite /normGI truncnK // algRe_div -gaussNormE divfK; last first.
+  rewrite /normGI truncnK // algRe_div -gaussNormE divfK.
     by rewrite gaussNorm_eq0.
   by rewrite floorK // rpredD // rpredM.
 have UyIm : Uy%:~R = 'Im (algGI x / algGI y * ('N(y))%GI%:R).
   rewrite algImM ['Re _%:R](Creal_ReP _ _) ?qualifE /= ?ler0n //.
   rewrite ?['Im _%:R](Creal_ImP _ _) ?qualifE /= ?ler0n // mulr0 add0r mulrC.
-  rewrite /normGI truncnK // algIm_div -gaussNormE divfK; last first.
+  rewrite /normGI truncnK // algIm_div -gaussNormE divfK.
     by rewrite gaussNorm_eq0.
   by rewrite floorK // rpredB // rpredM.
 rewrite ['N (_ * _)]/normGI /= -[algGI x](divfK yNz).
@@ -625,11 +624,10 @@ rewrite subC_rect ![_ + cmodz _ _]addrC.
 rewrite rmorphD /= rmorphM /= addrK.
 rewrite [(cmodz _ _ + _)%:~R]rmorphD /= rmorphM /= addrK.
 rewrite !gaussNormM gaussNormE normC2_rect ?(Rreal_int, intr_int) //.
-rewrite truncnM //; last by rewrite rpredD // natr_exp_even // intr_int.
-rewrite mulnC ltn_pmul2l; last by rewrite lt0n normGI_eq0.
+rewrite truncnM //; first by rewrite rpredD // natr_exp_even // intr_int.
+rewrite mulnC ltn_pmul2l; first by rewrite lt0n normGI_eq0.
 rewrite -!rmorphXn /= -!rmorphD /=.
-rewrite -[_ + _]gez0_abs ?natrK; last first.
-  by rewrite addr_ge0 // exprn_even_ge0.
+rewrite -[_ + _]gez0_abs ?natrK; first by rewrite addr_ge0 // exprn_even_ge0.
 set x1 := _ ^+ 2; set x2 := _ ^+ 2.
 apply: leq_ltn_trans (_ : (`|x1| + `|x2| < _)%N).
   have := leqD_dist (x1) (x1 - x2) (-x2).
@@ -737,7 +735,7 @@ Proof.
 case/dvdGIP=> q /val_eqP/eqP /(congr1 (fun x => Re x)) /=.
 case: x => /= ax; rewrite qualifE => /andP[Rx Ix].
 case: q => /= aq; rewrite qualifE => /andP[Rq Iq].
-rewrite [aq]algCrect mulrDl algGI_nat -['i * _ * _]mulrA Re_rect; last 2 first.
+rewrite [aq]algCrect mulrDl algGI_nat -['i * _ * _]mulrA Re_rect.
   by rewrite rpredM // Rreal_int // intr_nat.
   by rewrite rpredM // Rreal_int // intr_nat.
 move=> /(congr1 Num.norm) /eqP.
@@ -753,7 +751,7 @@ Proof.
 case/dvdGIP=> q /val_eqP/eqP/(congr1 (fun x => Im x)) /=.
 case: x => /= ax; rewrite qualifE => /andP[Rx Ix].
 case: q => /= aq; rewrite qualifE => /andP[Rq Iq].
-rewrite [aq]algCrect mulrDl algGI_nat -['i * _ * _]mulrA Im_rect; last 2 first.
+rewrite [aq]algCrect mulrDl algGI_nat -['i * _ * _]mulrA Im_rect.
   by rewrite rpredM // Rreal_int // intr_nat.
   by rewrite rpredM // Rreal_int // intr_nat.
 move=> /(congr1 Num.norm) /eqP.
@@ -791,7 +789,7 @@ suff FF : (n + m)/2%:R + 'i * ((n - m)/2%:R) \is a gaussInt.
   rewrite -addrA [_ + (_ - _)]addrC subrK.
   have F u : (u * 2%:R = u + u) by rewrite mulrDr mulr1.
   by rewrite -!F !mulfK 1?[algGI x]algCrect ?(eqC_nat _ 0).
-rewrite gaussIntE Re_rect ?Im_rect; last 4 first.
+rewrite gaussIntE Re_rect ?Im_rect.
 - by rewrite !(rpredM, rpredV) 1? rpredD ?Rreal_int.
 - by rewrite !(rpredM, rpredV) 1? rpredB ?rpredD ?Rreal_int.
 - by rewrite !(rpredM, rpredV) 1? rpredD ?Rreal_int.
@@ -892,13 +890,13 @@ Qed.
 Lemma gcd1GIE y :
   gcdGI 1 y = if ('N y == 1)%N then y else 1.
 Proof.
-rewrite gcdGIE normGI1; case: leqP => [|H].
-  rewrite leq_eqVlt; case: eqP => [/eqP|/= _].
-    by rewrite -dvdGI1 => /eqP->; rewrite gcd0GI.
-  rewrite ltnS leqn0 normGI_eq0 => /eqP->.
-  by rewrite modGI0 gcdGI0.
-rewrite modGI1 gcd0GI.
-by move: H; rewrite ltnNge leq_eqVlt negb_or => /andP[/negPf->].
+rewrite gcdGIE normGI1; case: leqP => [|H]; last first.
+  rewrite modGI1 gcd0GI.
+  by move: H; rewrite ltnNge leq_eqVlt negb_or => /andP[/negPf->].
+rewrite leq_eqVlt; case: eqP => [/eqP|/= _].
+  by rewrite -dvdGI1 => /eqP->; rewrite gcd0GI.
+rewrite ltnS leqn0 normGI_eq0 => /eqP->.
+by rewrite modGI0 gcdGI0.
 Qed.
 
 Lemma gcd1GI_norm y : 'N(gcdGI 1 y) = 1%N.
@@ -906,8 +904,7 @@ Proof. by rewrite gcd1GIE; case: eqP; rewrite ?normGI1. Qed.
 
 Lemma gcdGI1 y : gcdGI y 1 = 1.
 Proof.
-rewrite gcdGIE normGI1; case: leqP => [_|].
-  by rewrite modGI1 gcd0GI.
+rewrite gcdGIE normGI1; case: leqP => [_|]; first by rewrite modGI1 gcd0GI.
 rewrite ltnS leqn0 normGI_eq0 => /eqP->.
 by rewrite modGI0 gcdGI0.
 Qed.
@@ -954,8 +951,7 @@ Proof. by case/andP: (dvdGI_gcdlr x y). Qed.
 
 Lemma gcdGI_eq0 x y : (gcdGI x y == 0) = ((x == 0) && (y == 0)).
 Proof.
-have [/eqP->|/eqP nZx] := boolP (x == 0).
-  by rewrite gcd0GI.
+have [/eqP->|/eqP nZx] := boolP (x == 0); first by rewrite gcd0GI.
 have := dvdGI_gcdl x y.
 by case:eqP => //->; rewrite dvd0GI => /eqP.
 Qed.
@@ -979,7 +975,7 @@ move=> x y z /dvdGIP[qx -> /dvdGIP[qy ->]].
 by apply/dvdGIP; exists (qy * qx); rewrite mulrA.
 Qed.
 
-Lemma dvdGI_gcd x y z : x %| gcdGI y z = (x %| y) && (x %| z).
+Lemma dvdGI_gcd x y z : (x %| gcdGI y z) = (x %| y) && (x %| z).
 Proof.
 apply/idP/andP=> [dv_xyz | [dv_xy dv_xz]].
   by rewrite ?(dvdGI_trans dv_xyz) ?dvdGI_gcdl ?dvdGI_gcdr.
@@ -998,9 +994,8 @@ Qed.
 
 Lemma dvdGI_mul2r (p d x : GI) :  p != 0 ->  (d * p %| x * p) = (d %| x).
 Proof.
-move=> nZp; apply/dvdGIP/dvdGIP=> [] [q Hq]; exists q.
-  by apply: (mulIf nZp); rewrite -mulrA.
-by rewrite Hq mulrA.
+move=> nZp; apply/dvdGIP/dvdGIP=> [] [q Hq]; exists q; last by rewrite Hq mulrA.
+by apply: (mulIf nZp); rewrite -mulrA.
 Qed.
 
 Lemma dvdGI_mul2l (p d x : GI) :  p != 0 ->  (p * d %| p * x) = (d %| x).
@@ -1019,10 +1014,8 @@ Proof. by rewrite /lcmGI mulr0 div0GI. Qed.
 
 Lemma lcmGI_eq0 x y : (lcmGI x y == 0) = ((x == 0) || (y == 0)).
 Proof.
-have [/eqP->|nZx] := boolP (x == 0).
-  by rewrite lcm0GI eqxx.
-have [/eqP->|nZy] := boolP (y == 0).
-  by rewrite lcmGI0 eqxx.
+have [/eqP->|nZx] := boolP (x == 0); first by rewrite lcm0GI eqxx.
+have [/eqP->|nZy] := boolP (y == 0); first by rewrite lcmGI0 eqxx.
 rewrite /lcmGI.
 have /dvdGIP[q Hq]: gcdGI x y %| x * y by rewrite dvdGI_mulr // dvdGI_gcdl.
 rewrite Hq divGIKl ?gcdGI_eq0 ?negb_and ?nZx //.
@@ -1054,18 +1047,15 @@ Qed.
 
 Lemma eqGI_eq0  x y : x %= y -> (x == 0) = (y == 0).
 Proof.
-have [/eqP->|] := boolP (x == 0).
-  by rewrite eqGI_sym eqGI0.
+have [/eqP->|] := boolP (x == 0); first by rewrite eqGI_sym eqGI0.
 have [/eqP->|//] := boolP (y == 0).
 by rewrite eqGI0 => /negP.
 Qed.
 
 Lemma eqGI_norm  x y : x %= y -> 'N x = 'N y.
 Proof.
-have [/eqP->|nZx] := boolP (x == 0).
-  by rewrite eqGI_sym eqGI0 => /eqP->.
-have [/eqP->|nZy] := boolP (y == 0).
-  by rewrite eqGI0 => /eqP->.
+have [/eqP->|nZx] := boolP (x == 0); first by rewrite eqGI_sym eqGI0 => /eqP->.
+have [/eqP->|nZy] := boolP (y == 0); first by rewrite eqGI0 => /eqP->.
 case/andP => /(dvdGI_leq nZy) H1 /(dvdGI_leq nZx) H2.
 by apply/eqP; rewrite eqn_leq H1.
 Qed.
@@ -1236,7 +1226,7 @@ Qed.
 Lemma mulGI_gcdl x y z : gcdGI y z * x %= gcdGI (y * x) (z * x).
 Proof. by rewrite ![_ * x]mulrC mulGI_gcdr. Qed.
 
-Lemma dvdGI_lcm d1 d2 x : lcmGI d1 d2 %| x = (d1 %| x) && (d2 %| x).
+Lemma dvdGI_lcm d1 d2 x : (lcmGI d1 d2 %| x) = (d1 %| x) && (d2 %| x).
 Proof.
 have [/eqP->|nZd1] := boolP (d1 == 0).
   by rewrite lcm0GI dvd0GI; case: eqP => //->; rewrite dvdGI0.
@@ -1305,7 +1295,7 @@ pose nD := (Num.NumDomain.clone _ algC).
 rewrite lter_norml -2!(ler_int nD) floorK /= // in Hy.
 case/andP: Hy => Hy1 Hy2.
 rewrite -subr_ge0 /= -rmorphN /= opprK in Hy1.
-rewrite (le_trans (_ : 0 <= x + m%:R) _) //=; last by rewrite lerD2l ler_nat.
+rewrite (le_trans (_ : 0 <= x + m%:R) _) //=; first by rewrite lerD2l ler_nat.
 rewrite -addnn natrD ltrD2r.
 by rewrite (le_lt_trans (_ : x <= m%:R) _) //= ltr_nat.
 Qed.
@@ -1694,7 +1684,7 @@ Proof.
 move=> Pp nZx; set k := logGI p x.
 have Dk : p ^+ k %| x by rewrite pfactor_dvdGI.
 exists (x %/ p ^+ k); last by rewrite divGIK.
-rewrite primeGI_coprime // -(@dvdGI_mul2r (p ^+ k)); last first.
+rewrite primeGI_coprime // -(@dvdGI_mul2r (p ^+ k)).
   by apply: expf_neq0 (primeGI_neq0 Pp).
 by rewrite -exprS divGIK // pfactor_dvdGI // ltnn.
 Qed.
@@ -1719,7 +1709,7 @@ have yDpn : y %| p ^+ n by rewrite pnE dvdGI_mulr ?dvdGIxx.
 suff: y %= 1.
   rewrite /eqGI dvd1GI dvdGI1 andbT => /eqP Ny.
   have /eqP := congr1 normGI pnE; rewrite normGIM Ny mul1n.
-  rewrite !normGIX eqn_exp2l; last by case/primeGIP: Pp.
+  rewrite !normGIX eqn_exp2l; first by case/primeGIP: Pp.
   by move/eqP<-.
 elim: (n) yDpn => [|n1 IH]; first by rewrite expr0 /eqGI dvd1GI andbT.
 by rewrite exprS Gauss_dvdGIr // coprimeGI_sym.
@@ -1822,7 +1812,7 @@ have F1 : m1 %= gcdGI m1 p1 * gcdGI m1 q1.
   apply: IH => //; last first.
     by move: Cmn; rewrite coprimeGI_mull => /andP[].
   rewrite -ltnS (leq_trans _ mL) // ltnS normGIM normGIX.
-  rewrite -{1}['N m1]muln1 ltn_mul2l -{2}(expn0 ('N v)) ltn_exp2l //.
+  rewrite -{1}['N m1]muln1 ltn_mul2l -{2}(expn0 ('N v)) ltn_exp2l //; last first.
     rewrite logGI_gt0 mem_primesGI Pv nZm pdivGI_dvd.
     by move: OLNm; rewrite normGIM; case: ('N _).
   by case/primeGIP: Pv.
