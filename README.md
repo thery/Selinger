@@ -22,9 +22,9 @@ Remarks on Matsumoto and Amano’s normal form
   - Laurent Théry
 - License: [MIT License](LICENSE)
 - Additional dependencies:
-  - [MathComp ssreflect 2.5.0 or later](https://math-comp.github.io)
-  - [MathComp algebra 2.5.0 or later](https://math-comp.github.io)
-  - [MathComp field 2.5.0 or later](https://math-comp.github.io)
+  - [MathComp ssreflect 2.6.0 or later](https://math-comp.github.io)
+  - [MathComp algebra 2.6.0 or later](https://math-comp.github.io)
+  - [MathComp field 2.6.0 or later](https://math-comp.github.io)
 - Rocq/Coq namespace: `Selinger`
 - Related publication(s): none
 
